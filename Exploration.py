@@ -9,22 +9,19 @@ from User import User
 # ------------------
 
 # just checks if one region is covered (fixme: un pò bovino passare la cf)
-# todo: check del ragionamento
 def is_region_cover(region_x, region_y, sensors, cf):
     result = False
     user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
-    user.__x = region_x
-    user.__y = region_y
+    user.set_position(region_x, region_y)
 
     sensors_interference = [0 for _ in sensors]
     for sensor in sensors:
-        other_sensors = sensors.remove(sensor)
-        sensors_interference[sensor.id] = cf.__interference_power(sensor, user, other_sensors)
+        sensors_interference[sensor.id] = cf.interference_power(sensor, user, sensors)
 
     sensors_signal = [0 for _ in sensors]
-    if cf.__connection_test():
+    if cf.connection_test():
         for sensor in sensors:
-            sensors_signal[sensor.id] = (cf.__channel_gain(sensor, user) * sensor.transmitting_power) / (
+            sensors_signal[sensor.id] = (cf.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         sensors_interference[sensor.id] + PSDN * BANDWIDTH)
         max_signal = max(sensors_signal)
         if max_signal - user.desired_coverage_level > 0:

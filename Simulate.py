@@ -63,7 +63,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
         # every t the agents are moved in the direction of the goal point calculated by the control function
         # and the exploration matrix is updated
         cf.move_agents()
-        cf.pd_matrix.update(cf.agents + cf.base_stations)
+        cf.pd_matrix.update(cf)
 
         # at the end RCR and exploration level are updated, each user's is_covered flag is assigned
         current_reward = cf.RCR_after_move()

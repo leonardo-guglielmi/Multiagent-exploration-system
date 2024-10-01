@@ -6,6 +6,8 @@ class User:
     id = 0  # incremental id attribute, static attribute
 
     def __init__(self, area, desired_coverage_level, deserialize=False, is_fake=False):
+        self.__x = None
+        self.__y = None
         if not is_fake:
             self.id = User.id
             User.id += 1
@@ -30,3 +32,8 @@ class User:
 
     def get_position(self):
         return self.__x, self.__y
+
+    def set_position(self, x, y):
+        self.__x = x
+        self.__y = y
+

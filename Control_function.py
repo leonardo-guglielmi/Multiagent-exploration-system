@@ -24,7 +24,7 @@ class Control_function:
 
         # used for exploration
         self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_LENGTH)
-        self.pd_matrix.update(agents + base_stations)
+        self.pd_matrix.update(self)
 
     # ---------------------------------
     # Methods for agents connectivity
@@ -47,8 +47,9 @@ class Control_function:
                     else 0
         return graph
 
+    # old code: this method was private
     # interface function for __is_connected, now only works on control function's graph
-    def __connection_test(self):
+    def connection_test(self):
         return self.__is_connected(self.__calculate_graph())
 
     @staticmethod
@@ -80,21 +81,23 @@ class Control_function:
     # methods for the signal analysis
     # ---------------------------------
 
+    # old code: this method was private
     @staticmethod
-    def __channel_gain(current_sensor, current_user):
+    def channel_gain(current_sensor, current_user):
         # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
         # return the channel gain between user and agent
         return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
 
+    # old code: this was private
     # returns the total power of interferences that disturbs the sensor signal
-    def __interference_power(self, sensor, user, other_agents):
+    def interference_power(self, sensor, user, other_agents):
         interference_power = 0
         for other_sensor in other_agents + self.base_stations:
             if other_sensor.id != sensor.id:  # this is necessary because other_agents contains also the target sensor when called
                 if isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs:
                     continue
                 else:
-                    interference_power += self.__channel_gain(other_sensor, user) * other_sensor.transmitting_power
+                    interference_power += self.channel_gain(other_sensor, user) * other_sensor.transmitting_power
         return interference_power
 
     # returns a matrix that associate at each user the SINR of each agent
@@ -103,7 +106,7 @@ class Control_function:
 
         for sensor in self.agents + self.base_stations:
             for user in self.users:
-                SINR_matrix[sensor.id][user.id] = (self.__channel_gain(sensor, user) * sensor.transmitting_power) / (
+                SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
         return SINR_matrix
 
@@ -113,7 +116,7 @@ class Control_function:
 
     def __RCR(self, SINR_matrix, set_flag=False):
         RCR = 0
-        if self.__connection_test():
+        if self.connection_test():
             total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
             for user in self.users:
                 if total_SINR_per_user[user.id] - user.desired_coverage_level > 0:
@@ -130,7 +133,7 @@ class Control_function:
                                range(len(self.agents) + len(self.base_stations))]
         for user in self.users:
             for sensor in self.agents + self.base_stations:
-                interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
+                interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
 
         SINR_matrix = self.__SINR(interference_powers)
         return self.__RCR(SINR_matrix, True)
@@ -201,9 +204,10 @@ class Control_function:
                                        range(len(other_agents) + len(self.base_stations) + 1)]
         for user in self.users:
             for sensor in [agent] + other_agents + self.base_stations:
-                partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
+                partial_interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, other_agents)
 
         # iters through new sampled point and the actual position (it may don't move)
+        i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, type_of_search, t):
 
             # question: perché faccio la deep copy se tanto poi sovrascrivo tutto?
@@ -216,7 +220,7 @@ class Control_function:
             # update interferences power with new agent position
             for user in self.users:
                 for sensor in other_agents + self.base_stations:
-                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.__channel_gain(agent, user)
+                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
 
             SINR_matrix = self.__SINR(temporary_interference_powers)
             total_coverage_level = self.__RCR(SINR_matrix)
@@ -230,10 +234,13 @@ class Control_function:
                         total_coverage_level -= PENALTY
                         break
 
-            # fixme: qua devo ragionare  in modo diverso, non devo fare l' update della matrice (forse è da togliere tutto)
+            # create a simulation environment to calculate exploration level with new agent position
+            print("inizio calcolo per un nuovo punto "+str(i)+" agente "+str(agent.id))
             tmp_pd_matrix = copy.deepcopy(self.pd_matrix)
-            tmp_pd_matrix.update([agent]+other_agents)
+            tmp_pd_matrix.update(self)
             new_expl_level = self.exploration_level(tmp_pd_matrix)
+            print("fine calcolo per un nuovo punto"+str(i)+" agente "+str(agent.id))
+            i += 1
 
             agent.set_2D_position(original_position[0], original_position[1])
 
@@ -257,10 +264,14 @@ class Control_function:
     # --------------------------
 
     @staticmethod
-    # fixme: devi fare in un altro modo, prova con max-valore attuale (come implementato ora)
+    # per ora può essere un'idea, todo: chiedi al prof se può tornare
     def exploration_level(pd_matrix):
         expl = pd_matrix.matrix.size
         for i in range(pd_matrix.matrix.shape[0]):
             for j in range(pd_matrix.matrix.shape[1]):
                 expl -= pd_matrix.matrix[i, j]
-        return expl
+        return expl/pd_matrix.matrix.size
+
+
+
+
