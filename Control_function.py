@@ -1,11 +1,11 @@
 import copy
 import math
-import random
 import numpy
 import Exploration
 from Constants import *
 import scipy
 from Sensor import Base_station
+from User import *
 
 
 class Control_function:
@@ -86,7 +86,11 @@ class Control_function:
     def channel_gain(current_sensor, current_user):
         # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
         # return the channel gain between user and agent
-        return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
+        # todo: chiedi al prof se va bene modificare questo metodo, mi dava problemi nel caso di allineamento
+        if current_sensor.get_3D_position() == current_user.get_position()+(0,):
+            return PATH_GAIN
+        else:
+            return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
 
     # old code: this was private
     # returns the total power of interferences that disturbs the sensor signal
@@ -235,11 +239,7 @@ class Control_function:
                         break
 
             # create a simulation environment to calculate exploration level with new agent position
-            print("inizio calcolo per un nuovo punto "+str(i)+" agente "+str(agent.id))
-            tmp_pd_matrix = copy.deepcopy(self.pd_matrix)
-            tmp_pd_matrix.update(self)
-            new_expl_level = self.exploration_level(tmp_pd_matrix)
-            print("fine calcolo per un nuovo punto"+str(i)+" agente "+str(agent.id))
+            new_expl_level = self.test_calcolo_parziale(self.pd_matrix, agent)
             i += 1
 
             agent.set_2D_position(original_position[0], original_position[1])
@@ -260,17 +260,90 @@ class Control_function:
         return best_point
 
     # --------------------------
-    # Method for exploration level
+    # Methods for exploration level
     # --------------------------
 
     @staticmethod
     # per ora può essere un'idea, todo: chiedi al prof se può tornare
+    # metodo finale per il calcolo dell' expl_level totale
     def exploration_level(pd_matrix):
         expl = pd_matrix.matrix.size
         for i in range(pd_matrix.matrix.shape[0]):
             for j in range(pd_matrix.matrix.shape[1]):
                 expl -= pd_matrix.matrix[i, j]
         return expl/pd_matrix.matrix.size
+
+    # just checks if one region is covered
+    def is_region_cover(self, region_x, region_y):
+        result = False
+        user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
+        user.set_position(region_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
+                          region_y * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2)
+
+        sensors_interference = [0 for _ in self.agents + self.base_stations]
+        for sensor in self.agents + self.base_stations:
+            sensors_interference[sensor.id] = self.interference_power(sensor, user, self.agents + self.base_stations)
+
+        sensors_signal = [0 for _ in self.agents + self.base_stations]
+        if self.connection_test():
+            for sensor in self.agents + self.base_stations:
+                sensors_signal[sensor.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
+                        sensors_interference[sensor.id] + PSDN * BANDWIDTH)
+
+            max_signal = max(sensors_signal)
+            if max_signal - user.desired_coverage_level > 0:
+                result = True
+
+        return result
+
+    def test_calcolo_parziale(self, pd_matrix, agent):
+        inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+        if inf_x < 0:
+            inf_x = 0
+
+        inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_LENGTH)
+        if inf_y < 0:
+            inf_y = 0
+
+        sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+        if sup_x >= int(AREA_WIDTH/EXPLORATION_REGION_WIDTH):
+            sup_x = int(AREA_WIDTH/EXPLORATION_REGION_WIDTH)-1
+
+        sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_LENGTH)
+        if sup_y >= int(AREA_LENGTH/EXPLORATION_REGION_LENGTH):
+            sup_y = int(AREA_LENGTH/EXPLORATION_REGION_LENGTH)-1
+
+        # todo: semplifica ulteriormente andando ad aggiungere l'utente solo se quella cella non è già coperta
+        fake_users = [None for _ in range((sup_x - inf_x) * (sup_y - inf_y))]
+        k = 0
+        for i in range(inf_x, sup_x):
+            for j in range(inf_y, sup_y):
+                fake_users[k] = Fake_user(None, DESIRED_COVERAGE_LEVEL,
+                                          i * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
+                                          j * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2,
+                                          pd_matrix.matrix[i][j])
+                fake_users[k].id = k
+                k += 1
+
+        interference_powers = [[0 for _ in range(len(fake_users))] for _ in
+                               range(len(self.agents) + len(self.base_stations))]
+        for user in self.users:
+            for sensor in self.agents + self.base_stations:
+                interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
+
+        SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(fake_users)))
+        for sensor in self.agents + self.base_stations:
+            for user in fake_users:
+                SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
+                        interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
+
+        expl_level = 0
+        total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
+        for user in fake_users:
+            if total_SINR_per_user[user.id] - user.desired_coverage_level > 0:
+                expl_level += user.probability
+        return expl_level
+
 
 
 

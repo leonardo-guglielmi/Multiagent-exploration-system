@@ -4,11 +4,6 @@ la visibilità delle funzioni.
 Resta da implementare la lista dinamica di utenti, inoltre poiché metti ad uno la prob di una cella dove c'è un utente, devi
 comunque implementare la ricerca della cella a partire della posizione generica
 
-Idea per velocizzare il calcolo dell'esplorazione: invece di fare come fai ora, trova un elenco di fake_user posizionati
-nel centro della cella che sono sotto al drone con la nuova posizione, una volta identificati questi faccio il calcolo del
-SINR come facevo prima, e se il SINR è soddisfacente posso pensare di considerare quella cella coperta
-(per questo posso creare un nuovo user avente la prob, associata la stessa della cella)
-
 -----------------
 Idea di sviluppo: rendi la probabilità di apparizione di un'utente dipendente dal numero di utenti ancora non scoperti
 -----------------

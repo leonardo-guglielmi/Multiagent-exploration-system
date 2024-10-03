@@ -37,3 +37,9 @@ class User:
         self.__x = x
         self.__y = y
 
+
+class Fake_user(User):
+    def __init__(self, area, desired_coverage_level, x, y, probability, deserialize=False, is_fake=True):
+        User.__init__(self, area, desired_coverage_level, deserialize, is_fake)
+        self.set_position(x, y)
+        self.probability = probability
