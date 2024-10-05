@@ -23,9 +23,8 @@ class Control_function:
         self.max_dist_for_coverage = (PATH_GAIN / (
                     DESIRED_COVERAGE_LEVEL * PSDN * BANDWIDTH / TRANSMITTING_POWER)) ** 0.5
 
-        # used for exploration
-        self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH,
-                                                                     EXPLORATION_REGION_LENGTH)
+        # attributes used for exploration
+        self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_LENGTH)
         self.pd_matrix.update(self)
 
     # ---------------------------------
@@ -41,7 +40,7 @@ class Control_function:
         graph = numpy.zeros((len(sensors), len(sensors)))
         for i in range(len(sensors)):
             for j in range(len(sensors)):
-                # question: non c'é una potenza/radice di troppo
+                # question: non c'é una potenza/radice di troppo?
                 graph[i][j] = 1 if i != j and (
                         (sensors[i].get_x() - sensors[j].get_x()) ** 2 +
                         (sensors[i].get_y() - sensors[j].get_y()) ** 2 +
@@ -50,7 +49,6 @@ class Control_function:
         return graph
 
     # old code: this method was private
-    # interface function for __is_connected, now only works on control function's graph
     def connection_test(self):
         return self.__is_connected(self.__calculate_graph())
 
@@ -88,12 +86,11 @@ class Control_function:
     def channel_gain(current_sensor, current_user):
         # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
         # return the channel gain between user and agent
-        # todo: chiedi al prof se va bene modificare questo metodo, mi dava problemi nel caso di allineamento
+        # todo: chiedi al prof se va bene modificare questo metodo, mi dava problemi perché quando creo i fake users, le base stations ed essi coincidevano
         if current_sensor.get_3D_position() == current_user.get_position() + (0,):
             return PATH_GAIN
         else:
-            return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)),
-                                        2)
+            return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
 
     # old code: this was private
     # returns the total power of interferences that disturbs the sensor signal
@@ -204,16 +201,16 @@ class Control_function:
     # ---------------------------------
     def find_goal_point_for_agent(self, agent, other_agents, type_of_search, t):
         best_point = None
-        best_cost_function = -1  # old code: best_coverage = -1
+        best_cost_function = -1  # old code: best_coverage = -1 todo: pensa di rinominarlo come best_reward
 
-        # store starting interferences power
+        # store powers of the actual interference
         partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
                                        range(len(other_agents) + len(self.base_stations) + 1)]
         for user in self.users:
             for sensor in [agent] + other_agents + self.base_stations:
                 partial_interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, other_agents)
 
-        # iters through new sampled point and the actual position (it may don't move)
+        # iters through new sampled points and the actual position (it may don't move)
         i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, type_of_search, t):
 
@@ -227,11 +224,11 @@ class Control_function:
             # update interferences power with new agent position
             for user in self.users:
                 for sensor in other_agents + self.base_stations:
-                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(
-                        agent, user)
+                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
 
             SINR_matrix = self.__SINR(temporary_interference_powers)
             total_coverage_level = self.__RCR(SINR_matrix)
+            new_expl_level = self.test_calcolo_parziale(agent)
 
             # skip: questo non ti riguarda
             if type_of_search == "penalty":
@@ -242,8 +239,6 @@ class Control_function:
                         total_coverage_level -= PENALTY
                         break
 
-            # create a simulation environment to calculate exploration level with new agent position
-            new_expl_level = self.test_calcolo_parziale(self.pd_matrix, agent)
             i += 1
 
             agent.set_2D_position(original_position[0], original_position[1])
@@ -268,40 +263,43 @@ class Control_function:
     # Methods for exploration level
     # --------------------------
 
-    @staticmethod
-    # per ora può essere un'idea, todo: chiedi al prof se può tornare
+    # per ora può essere un'idea calcolarlo in questo modo, todo: chiedi al prof se può tornare come calcolo
     # metodo finale per il calcolo dell' expl_level totale
-    def exploration_level(pd_matrix):
-        expl = pd_matrix.matrix.size
-        for i in range(pd_matrix.matrix.shape[0]):
-            for j in range(pd_matrix.matrix.shape[1]):
-                expl -= pd_matrix.matrix[i, j]
-        return expl / pd_matrix.matrix.size
+    def exploration_level(self):
+        expl = self.pd_matrix.matrix.size
+        for i in range(self.pd_matrix.matrix.shape[0]):
+            for j in range(self.pd_matrix.matrix.shape[1]):
+                expl -= self.pd_matrix.matrix[i, j]
+        return expl / self.pd_matrix.matrix.size
 
-    # just checks if one region is covered
-    def is_region_cover(self, region_x, region_y):
+    # just checks if one cell is covered
+    def is_cell_covered(self, cell_x, cell_y):
         result = False
+        # create fake user in the middle of the cell for the interference_power() function
         user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
-        user.set_position(region_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
-                          region_y * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2)
+        user.set_position(cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
+                          cell_y * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2)
 
         sensors_interference = [0 for _ in self.agents + self.base_stations]
         for sensor in self.agents + self.base_stations:
             sensors_interference[sensor.id] = self.interference_power(sensor, user, self.agents + self.base_stations)
 
-        sensors_signal = [0 for _ in self.agents + self.base_stations]
+        # I can't use SINR built-in function because it uses the default user list
+        sensors_SINR = [0 for _ in self.agents + self.base_stations]
         if self.connection_test():
             for sensor in self.agents + self.base_stations:
-                sensors_signal[sensor.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
+                sensors_SINR[sensor.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         sensors_interference[sensor.id] + PSDN * BANDWIDTH)
 
-            max_signal = max(sensors_signal)
-            if max_signal - user.desired_coverage_level > 0:
+            best_SINR = max(sensors_SINR)
+            if best_SINR - user.desired_coverage_level > 0:
                 result = True
 
         return result
 
-    def test_calcolo_parziale(self, pd_matrix, agent):
+    # calculate the exploration level for each new position is very slow ad also useless: I can examine only the cells
+    # in the maximum radius, if the agent covers that
+    def test_calcolo_parziale(self, agent):
         inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
         if inf_x < 0:
             inf_x = 0
@@ -322,11 +320,12 @@ class Control_function:
         k = 0
         for i in range(inf_x, sup_x):
             for j in range(inf_y, sup_y):
-                if pd_matrix.matrix[i][j] != 0:
+                # to reducing the number of cell to examine, if one cell il already covered I ignore it
+                if self.pd_matrix.matrix[i][j] != 0:
                     fake_users.append(Fake_user(None, DESIRED_COVERAGE_LEVEL,
                                                 i * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
                                                 j * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2,
-                                                pd_matrix.matrix[i][j]))
+                                                self.pd_matrix.matrix[i][j]))
                     fake_users[k].id = k
                     k += 1
 
@@ -336,15 +335,16 @@ class Control_function:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
 
+        # similar to the normal SINR method, the only difference is the user list, this one contains fake users
         SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(fake_users)))
         for sensor in self.agents + self.base_stations:
             for user in fake_users:
                 SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
 
-        expl_level = 0
-        total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
+        exploation_level = 0
+        max_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
         for user in fake_users:
-            if total_SINR_per_user[user.id] - user.desired_coverage_level > 0:
-                expl_level += user.probability
-        return expl_level
+            if max_SINR_per_user[user.id] - user.desired_coverage_level > 0:
+                exploation_level += user.probability
+        return exploation_level

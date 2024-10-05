@@ -1,9 +1,15 @@
-Chiedi al prof quanto puoi modificare il codice, se per esempi puoi cambiare la disposizione delle funzioni e dei moduli,
-la visibilità delle funzioni.
-
-Resta da implementare la lista dinamica di utenti, inoltre poiché metti ad uno la prob di una cella dove c'è un utente, devi
-comunque implementare la ricerca della cella a partire della posizione generica
+Resta da implementare la lista dinamica di utenti, inoltre dovrai modificare il metodo RCR o qualcosa del genere per far mettere
+ad 1 la prob. della cella i cui si trova quell'utente (se la cella non è coperta da altri agenti)
 
 -----------------
 Idea di sviluppo: rendi la probabilità di apparizione di un'utente dipendente dal numero di utenti ancora non scoperti
 -----------------
+Idea di sviluppo: utilizza un metodo ispirato all' hybrid-exploration dell'articolo
+-----------------
+
+Analisi risultati 04/10: risultati buoni, sembra che tutto funzione come previsto
+Cose da mostrare al prof:
+- l'introduzione della classe Fake_user e l'aggiunta dell'attributo is_fake nella classe user
+- la modifica della visibilità di alcune funzioni (segnate nel codice)
+- se il livello di esplorazione calcolato in quel modo può andare bene
+- se posso modificare il codice già presente per adattarlo a quello che devi fare te

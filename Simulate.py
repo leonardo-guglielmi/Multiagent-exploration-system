@@ -41,7 +41,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     current_reward = cf.RCR_after_move()
     rewards.append(current_reward)
 
-    current_expl = cf.exploration_level(cf.pd_matrix)
+    current_expl = cf.exploration_level()
     exploration_levels.append(current_expl)
 
     print("Start coverage level: ", current_reward)
@@ -68,7 +68,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
         # at the end RCR and exploration level are updated, each user's is_covered flag is assigned
         current_reward = cf.RCR_after_move()
         rewards.append(current_reward)
-        current_expl = cf.exploration_level(cf.pd_matrix)
+        current_expl = cf.exploration_level()
         exploration_levels.append(current_expl)
 
         # skip: questo non ti riguarda
