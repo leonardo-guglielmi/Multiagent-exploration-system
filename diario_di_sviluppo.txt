@@ -1,6 +1,3 @@
-Resta da implementare la lista dinamica di utenti, inoltre dovrai modificare il metodo RCR o qualcosa del genere per far mettere
-ad 1 la prob. della cella i cui si trova quell'utente (se la cella non è coperta da altri agenti)
-
 -----------------
 Idea di sviluppo: rendi la probabilità di apparizione di un'utente dipendente dal numero di utenti ancora non scoperti
 -----------------
@@ -13,3 +10,4 @@ Cose da mostrare al prof:
 - la modifica della visibilità di alcune funzioni (segnate nel codice)
 - se il livello di esplorazione calcolato in quel modo può andare bene
 - se posso modificare il codice già presente per adattarlo a quello che devi fare te
+- chiedi questa cosa della coverage con solo utenti scoperti

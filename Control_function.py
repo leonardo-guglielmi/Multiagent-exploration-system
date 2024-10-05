@@ -9,11 +9,12 @@ from User import *
 
 
 class Control_function:
-    def __init__(self, area, base_stations, agents, users):
+    def __init__(self, area, base_stations, agents, total_users):
         self.area = area
         self.base_stations = base_stations
         self.agents = agents
-        self.users = users
+        self.total_users = total_users
+        self.discovered_users = []
 
         # used for agents connectivity test
         self.__sensors_graph = None
@@ -21,10 +22,12 @@ class Control_function:
         self.__update_sensors_graph()
 
         self.max_dist_for_coverage = (PATH_GAIN / (
-                    DESIRED_COVERAGE_LEVEL * PSDN * BANDWIDTH / TRANSMITTING_POWER)) ** 0.5
+                DESIRED_COVERAGE_LEVEL * PSDN * BANDWIDTH / TRANSMITTING_POWER)) ** 0.5
 
         # attributes used for exploration
-        self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_LENGTH)
+        self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH,
+                                                                     EXPLORATION_REGION_HEIGTH,
+                                                                     total_users)
         self.pd_matrix.update(self)
 
     # ---------------------------------
@@ -90,7 +93,8 @@ class Control_function:
         if current_sensor.get_3D_position() == current_user.get_position() + (0,):
             return PATH_GAIN
         else:
-            return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
+            return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)),
+                                        2)
 
     # old code: this was private
     # returns the total power of interferences that disturbs the sensor signal
@@ -105,11 +109,12 @@ class Control_function:
         return interference_power
 
     # returns a matrix that associate at each user the SINR of each agent
+    # todo: chiedi al prof, qua uso la lista di tutti gli utenti sennò non riuscirei mai a vedere se un utente è coperto o meno
     def __SINR(self, interference_powers):
-        SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(self.users)))
+        SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(self.total_users)))
 
         for sensor in self.agents + self.base_stations:
-            for user in self.users:
+            for user in self.total_users:
                 SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
         return SINR_matrix
@@ -122,20 +127,25 @@ class Control_function:
         RCR = 0
         if self.connection_test():
             total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
-            for user in self.users:
+            for user in self.total_users:
                 if total_SINR_per_user[user.id] - user.desired_coverage_level > 0:
                     RCR += 1
                     if set_flag:
                         user.set_is_covered(True)
+                        if user not in self.discovered_users:
+                            self.discovered_users.append(user)
                 else:
                     if set_flag:
                         user.set_is_covered(False)
-        return RCR / len(self.users)
+                        if user in self.discovered_users:
+                            self.discovered_users.remove(user)
+
+        return RCR / len(self.total_users)
 
     def RCR_after_move(self):
-        interference_powers = [[0 for _ in range(len(self.users))] for _ in
+        interference_powers = [[0 for _ in range(len(self.total_users))] for _ in
                                range(len(self.agents) + len(self.base_stations))]
-        for user in self.users:
+        for user in self.total_users:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
 
@@ -199,14 +209,15 @@ class Control_function:
     # ---------------------------------
     # method that choose between the sampled points in the method above
     # ---------------------------------
+    # todo: forse qui devo considerare gli utenti non coperti
     def find_goal_point_for_agent(self, agent, other_agents, type_of_search, t):
         best_point = None
         best_cost_function = -1  # old code: best_coverage = -1 todo: pensa di rinominarlo come best_reward
 
         # store powers of the actual interference
-        partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
+        partial_interference_powers = [[0 for _ in range(len(self.total_users))] for _ in
                                        range(len(other_agents) + len(self.base_stations) + 1)]
-        for user in self.users:
+        for user in self.total_users:
             for sensor in [agent] + other_agents + self.base_stations:
                 partial_interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, other_agents)
 
@@ -222,9 +233,10 @@ class Control_function:
             agent.set_2D_position(point[0], point[1])
 
             # update interferences power with new agent position
-            for user in self.users:
+            for user in self.total_users:
                 for sensor in other_agents + self.base_stations:
-                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
+                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(
+                        agent, user)
 
             SINR_matrix = self.__SINR(temporary_interference_powers)
             total_coverage_level = self.__RCR(SINR_matrix)
@@ -240,11 +252,9 @@ class Control_function:
                         break
 
             i += 1
-
             agent.set_2D_position(original_position[0], original_position[1])
 
-            # todo: attento qua la coverage è impostata a 0
-            cost_function_under_test = 0 * total_coverage_level + EXPLORATION_FACTOR * new_expl_level
+            cost_function_under_test = total_coverage_level + EXPLORATION_FACTOR * new_expl_level
             if cost_function_under_test > best_cost_function or (cost_function_under_test == best_cost_function and
                                                                  math.dist(agent.get_2D_position(), point) > math.dist(
                         agent.get_2D_position(), best_point)):
@@ -278,7 +288,7 @@ class Control_function:
         # create fake user in the middle of the cell for the interference_power() function
         user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
         user.set_position(cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
-                          cell_y * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2)
+                          cell_y * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2)
 
         sensors_interference = [0 for _ in self.agents + self.base_stations]
         for sensor in self.agents + self.base_stations:
@@ -304,7 +314,7 @@ class Control_function:
         if inf_x < 0:
             inf_x = 0
 
-        inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_LENGTH)
+        inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
         if inf_y < 0:
             inf_y = 0
 
@@ -312,9 +322,9 @@ class Control_function:
         if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
             sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
 
-        sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_LENGTH)
-        if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_LENGTH):
-            sup_y = int(AREA_LENGTH / EXPLORATION_REGION_LENGTH) - 1
+        sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+        if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
+            sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
 
         fake_users = []
         k = 0
@@ -324,7 +334,7 @@ class Control_function:
                 if self.pd_matrix.matrix[i][j] != 0:
                     fake_users.append(Fake_user(None, DESIRED_COVERAGE_LEVEL,
                                                 i * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
-                                                j * EXPLORATION_REGION_LENGTH + EXPLORATION_REGION_LENGTH / 2,
+                                                j * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2,
                                                 self.pd_matrix.matrix[i][j]))
                     fake_users[k].id = k
                     k += 1
