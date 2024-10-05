@@ -342,9 +342,9 @@ class Control_function:
                 SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
 
-        exploation_level = 0
+        exploration_level = 0
         max_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
         for user in fake_users:
             if max_SINR_per_user[user.id] - user.desired_coverage_level > 0:
-                exploation_level += user.probability
-        return exploation_level
+                exploration_level += user.probability
+        return exploration_level
