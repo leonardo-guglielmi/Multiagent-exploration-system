@@ -29,7 +29,7 @@ ALTITUDE = 50  # in meters
 TRANSMITTING_POWER = 0.2  # in Watts
 
 # constants for exploration
-EXPLORATION_FACTOR = 1  # rho in the model
+EXPLORATION_FACTOR = 0.4  # rho in the model
 USER_DISCONNECTION_PROBABILITY = 0.01  # Pd in the model
 USER_APPEARANCE_PROBABILITY = 0.3  # Pb in the model
 NUM_ITER_BEFORE_EXPIRE = 3  # not used yet

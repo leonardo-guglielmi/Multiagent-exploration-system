@@ -3,11 +3,23 @@ Idea di sviluppo: rendi la probabilità di apparizione di un'utente dipendente d
 -----------------
 Idea di sviluppo: utilizza un metodo ispirato all' hybrid-exploration dell'articolo
 -----------------
+IDEA SOLUZIONE: per far si che il numero di utenti scoperti sia rilevante, potrei tenere una lista degli id scoperti, e a
+ogni iter rinnovare con gli id degli utenti che ho coperto.
+A ogni id è associato un contatore, e quando arriva a zero (dopo tot iter) non considero più quell'utente come esistente, e rimuovo
+l'id dalla lista.
+L'RCR verrà calcolato un base alla lunghezza della lista degli id.
+-----------------
+REMINDER: ricordati di fare anche i calcoli statistici per l' exploration alla fine
 
-Analisi risultati 04/10: risultati buoni, sembra che tutto funzione come previsto
-Cose da mostrare al prof:
-- l'introduzione della classe Fake_user e l'aggiunta dell'attributo is_fake nella classe user
-- la modifica della visibilità di alcune funzioni (segnate nel codice)
-- se il livello di esplorazione calcolato in quel modo può andare bene
-- se posso modificare il codice già presente per adattarlo a quello che devi fare te
-- chiedi questa cosa della coverage con solo utenti scoperti
+PENSIERO: ogni volta che faccio un calcolo ricalcolo per intero la SINR e compagnia, ma alla fine serve davvero? Non potrei
+semplicemente aggiornarla solo per l'utente che mi interessa, così da ridurre il numero di iterazioni da fare a ogni ciclo
+e risparmiare tempo? => ricontrolla meglio, il movimento di un solo agnete provoca la modifica del SINR anche delle celle coperte
+da altri agenti, quindi il calcolo "ridondate" lo devi fare lo stesso.
+
+BRAINSTORM DEI RISULTATI DA PLOTTARE:
+- grafici di exploration e coverage
+- situazione iniziale e finale
+- animazione delle iterazioni
+- confronto tra le coverage dei vari metodi (questo da riguardare)
+- confronto tra le exploration dei vari metodi (in modo simile a quanto fatto prima)
+Inoltre, se dovessi provare più modelli, tieni un archivio dei risultati ottenuti

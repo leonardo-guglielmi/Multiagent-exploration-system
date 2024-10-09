@@ -102,13 +102,15 @@ def plot_rewards(rewards, time_elapsed, type_of_search, num_of_iter):
     plt.show()
 
 
-def plot_exploration(exploration_levels, type_of_search, num_of_iter):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iters')
     plt.ylabel('Exploration')
+    plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top', transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic_graphic.png')
+    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
+    pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
     plt.show()
 
 

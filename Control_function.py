@@ -14,7 +14,7 @@ class Control_function:
         self.base_stations = base_stations
         self.agents = agents
         self.total_users = total_users
-        self.discovered_users = []
+        self.discovered_users = []  # actually not used
 
         # used for agents connectivity test
         self.__sensors_graph = None
@@ -225,7 +225,6 @@ class Control_function:
         i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, type_of_search, t):
 
-            # question: perché faccio la deep copy se tanto poi sovrascrivo tutto?
             temporary_interference_powers = copy.deepcopy(partial_interference_powers)
 
             # move the agent and store its old position
@@ -285,18 +284,20 @@ class Control_function:
     # just checks if one cell is covered
     def is_cell_covered(self, cell_x, cell_y):
         result = False
-        # create fake user in the middle of the cell for the interference_power() function
-        user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
-        user.set_position(cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
-                          cell_y * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2)
-
-        sensors_interference = [0 for _ in self.agents + self.base_stations]
-        for sensor in self.agents + self.base_stations:
-            sensors_interference[sensor.id] = self.interference_power(sensor, user, self.agents + self.base_stations)
-
-        # I can't use SINR built-in function because it uses the default user list
-        sensors_SINR = [0 for _ in self.agents + self.base_stations]
         if self.connection_test():
+            # create fake user in the middle of the cell for the interference_power() function
+            user = User(None, DESIRED_COVERAGE_LEVEL, is_fake=True)
+            user.set_position(cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
+                              cell_y * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2)
+
+            sensors_interference = [0 for _ in self.agents + self.base_stations]
+            for sensor in self.agents + self.base_stations:
+                sensors_interference[sensor.id] = self.interference_power(sensor, user,
+                                                                          self.agents + self.base_stations)
+
+            # I can't use SINR built-in function because it uses the default user list
+            sensors_SINR = [0 for _ in self.agents + self.base_stations]
+
             for sensor in self.agents + self.base_stations:
                 sensors_SINR[sensor.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
                         sensors_interference[sensor.id] + PSDN * BANDWIDTH)
@@ -345,7 +346,7 @@ class Control_function:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
 
-        # similar to the normal SINR method, the only difference is the user list, this one contains fake users
+        # similar to the normal SINR method, the only difference is the user list, this uses fake users
         SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(fake_users)))
         for sensor in self.agents + self.base_stations:
             for user in fake_users:
