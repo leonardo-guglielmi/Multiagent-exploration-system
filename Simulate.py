@@ -76,7 +76,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
         if type_of_search == "mixed" and t == int(NUM_OF_ITERATIONS / 2):
             type_of_search = "systematic mixed"
 
-        print(type_of_search, "iteration: ", t, "coverage level: ", current_reward, "| exploration_level: ", current_expl)
+        print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, " exploration_level: ", current_expl)
 
     end = timer()
 
@@ -89,5 +89,5 @@ def simulate(type_of_search, num_of_iter, deserialize):
         type_of_search = "mixed"
     plot_area(area, users, base_stations, agents, type_of_search, num_of_iter)
     plot_rewards(rewards, time_elapsed, type_of_search, num_of_iter)
-    plot_exploration(exploration_levels, type_of_search, num_of_iter)
+    plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
     pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))

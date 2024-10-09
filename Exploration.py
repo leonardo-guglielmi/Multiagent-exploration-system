@@ -21,4 +21,4 @@ class Probability_distribution_matrix:
                 cell_x = int(user_x / EXPLORATION_REGION_WIDTH)
                 cell_y = int(user_y / EXPLORATION_REGION_HEIGTH)
                 self.matrix[cell_x][cell_y] = 1
-        self.users_list = cf.users
+        self.users_list = cf.total_users
