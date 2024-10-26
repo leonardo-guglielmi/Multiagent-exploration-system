@@ -18,6 +18,9 @@ Idea sviluppo: quando faccio il calcolo de SINR inserisco nel calcolo solo quegl
 Il tante volte mi muovo facendo dei passettini inutili (per esempio quando ho raggiunto un punto in cui copro molti utenti) potrebbe essere una buona idea, in vista di efficienza energetica, limitare il guadagno che mi spinge ad un movimento? oppure rischio di pregiudicare il movimento?
 -----------------
 
+>> DA CHIEDERE AL RICEVIMENTO
+- anche per l'exploration devo calcolarmi tutte le statistiche come nella coverage
+
 >> ROAD MAP POST-RICEVIMENTO
 - implementa il calcolo senza le interferenze e vedi quanto ci mette (in questo non usare il quadrato riduttivo)
 - usa Pb=0.3 senza dividere per la cardinalità delle celle

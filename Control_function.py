@@ -51,7 +51,6 @@ class Control_function:
                     else 0
         return graph
 
-    # old code: this method was private
     def connection_test(self):
         return self.__is_connected(self.__calculate_graph())
 
@@ -84,19 +83,16 @@ class Control_function:
     # methods for the signal analysis
     # ---------------------------------
 
-    # old code: this method was private
     @staticmethod
     def channel_gain(current_sensor, current_user):
         # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
         # return the channel gain between user and agent
-        # todo: chiedi al prof se va bene modificare questo metodo, mi dava problemi perché quando creo i fake users, le base stations ed essi coincidevano
         if current_sensor.get_3D_position() == current_user.get_position() + (0,):
             return PATH_GAIN
         else:
             return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)),
                                         2)
 
-    # old code: this was private
     # returns the total power of interferences that disturbs the sensor signal
     def interference_power(self, sensor, user, other_agents):
         interference_power = 0
@@ -109,7 +105,6 @@ class Control_function:
         return interference_power
 
     # returns a matrix that associate at each user the SINR of each agent
-    # todo: chiedi al prof, qua uso la lista di tutti gli utenti sennò non riuscirei mai a vedere se un utente è coperto o meno
     def __SINR(self, interference_powers):
         SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(self.total_users)))
 
@@ -209,10 +204,9 @@ class Control_function:
     # ---------------------------------
     # method that choose between the sampled points in the method above
     # ---------------------------------
-    # todo: forse qui devo considerare gli utenti non coperti
     def find_goal_point_for_agent(self, agent, other_agents, type_of_search, t):
         best_point = None
-        best_cost_function = -1  # old code: best_coverage = -1 todo: pensa di rinominarlo come best_reward
+        best_reward = -1
 
         # store powers of the actual interference
         partial_interference_powers = [[0 for _ in range(len(self.total_users))] for _ in
@@ -253,18 +247,12 @@ class Control_function:
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            cost_function_under_test = total_coverage_level + EXPLORATION_FACTOR * new_expl_level
-            if cost_function_under_test > best_cost_function or (cost_function_under_test == best_cost_function and
+            reward_under_test = total_coverage_level + EXPLORATION_FACTOR * new_expl_level
+            if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                                  math.dist(agent.get_2D_position(), point) > math.dist(
                         agent.get_2D_position(), best_point)):
-                best_cost_function = cost_function_under_test
+                best_reward = reward_under_test
                 best_point = point
-
-            # old code
-            # if total_coverage_level > best_coverage or total_coverage_level == best_coverage and math.dist(
-            #        agent.get_2D_position(), point) < math.dist(agent.get_2D_position(), best_point):
-            #    best_coverage = total_coverage_level
-            #    best_point = point
 
         return best_point
 
@@ -272,7 +260,6 @@ class Control_function:
     # Methods for exploration level
     # --------------------------
 
-    # per ora può essere un'idea calcolarlo in questo modo, todo: chiedi al prof se può tornare come calcolo
     # metodo finale per il calcolo dell' expl_level totale
     def exploration_level(self):
         expl = self.pd_matrix.matrix.size

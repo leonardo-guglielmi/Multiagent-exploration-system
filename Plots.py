@@ -90,15 +90,15 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter):
     plt.show()
 
 
-def plot_rewards(rewards, time_elapsed, type_of_search, num_of_iter):
+def plot_rewards(coverages, time_elapsed, type_of_search, num_of_iter):
     plt.subplots()
-    plt.plot(range(len(rewards)), rewards)
+    plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
-    plt.ylabel('Reward')
+    plt.ylabel('Coverage')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top', transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/rewards_graphic.png')
-    pickle.dump(rewards, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
+    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
+    pickle.dump(coverages, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
     plt.show()
 
 
