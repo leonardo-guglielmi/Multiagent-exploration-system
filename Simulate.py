@@ -31,18 +31,21 @@ def simulate(type_of_search, num_of_iter, deserialize):
     # -----------------------------------------------
 
     # coverage history
-    rewards = []
-    # exploration_level_history
+    coverage_levels = []
+    # exploration level history
     exploration_levels = []
+    # probability distribution matrix history
+    prob_matrix_history = []
 
     cf = Control_function(area, base_stations, agents, users)
 
     # starting points for coverage & exploration levels
     current_reward = cf.RCR_after_move()
-    rewards.append(current_reward)
+    coverage_levels.append(current_reward)
 
     current_expl = cf.exploration_level()
     exploration_levels.append(current_expl)
+    prob_matrix_history.append(cf.pd_matrix.matrix)
 
     print("Start coverage level: ", current_reward)
     print("Start exploration level: ", current_expl)
@@ -64,10 +67,11 @@ def simulate(type_of_search, num_of_iter, deserialize):
         # and the exploration matrix is updated
         cf.move_agents()
         cf.pd_matrix.update(cf)
+        prob_matrix_history.append(cf.pd_matrix.matrix)
 
         # at the end RCR and exploration level are updated, each user's is_covered flag is assigned
         current_reward = cf.RCR_after_move()
-        rewards.append(current_reward)
+        coverage_levels.append(current_reward)
         current_expl = cf.exploration_level()
         exploration_levels.append(current_expl)
 
@@ -87,7 +91,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     print("Final exploration level: ", current_expl)
     if type_of_search == "systematic mixed":
         type_of_search = "mixed"
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter)
-    plot_rewards(rewards, time_elapsed, type_of_search, num_of_iter)
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
+    plot_rewards(coverage_levels, time_elapsed, type_of_search, num_of_iter)
     plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
     pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))

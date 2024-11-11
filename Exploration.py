@@ -13,7 +13,7 @@ class Probability_distribution_matrix:
         for i in range(self.matrix.shape[0]):
             for j in range(self.matrix.shape[1]):
                 self.matrix[i, j] = 0 if cf.is_cell_covered(i, j) \
-                    else USER_APPEARANCE_PROBABILITY / self.matrix.size + self.matrix[i, j] * USER_DISCONNECTION_PROBABILITY
+                    else USER_APPEARANCE_PROBABILITY + self.matrix[i, j] * USER_DISCONNECTION_PROBABILITY
 
         for old_user, new_user in zip(self.users_list, cf.total_users):
             if old_user.is_covered and not new_user.is_covered:

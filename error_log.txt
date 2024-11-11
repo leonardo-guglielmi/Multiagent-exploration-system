@@ -1,1 +1,1 @@
-'Control_function' object has no attribute 'users'
+list.remove(x): x not in list
