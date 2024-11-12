@@ -17,8 +17,8 @@ class Control_function:
         self.discovered_users = []  # actually not used
 
         # used for agents connectivity test
-        self.__sensors_graph = None
-        self.__is_connected_flag = False
+        self.sensors_graph = None
+        self.is_connected_flag = False
         self.update_sensors_graph()
 
         self.max_dist_for_coverage = (PATH_GAIN / (
@@ -34,8 +34,8 @@ class Control_function:
     # Methods for agents connectivity
     # ---------------------------------
     def update_sensors_graph(self):
-        self.__sensors_graph = self.calculate_graph()
-        self.__is_connected_flag = self.is_connected(self.__sensors_graph)
+        self.sensors_graph = self.calculate_graph()
+        self.is_connected_flag = self.is_connected(self.sensors_graph)
 
     def calculate_graph(self):
         sensors = self.base_stations + self.agents
