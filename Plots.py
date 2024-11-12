@@ -11,7 +11,7 @@ agent_scatter = []
 prob_matrix_scatter = []
 
 
-# todo: start using fig. instead of plt. for function calling
+# todo: start using ax. instead of plt. for function calling
 def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history):
     fig, ax = plt.subplots()
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -38,6 +38,11 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     trajectories = [agent.trajectory for agent in agents]
     lines = [ax.plot([], [], lw=0.7)[0] for _ in
              trajectories]  # [0] allow to work directly with Line2D objects, not with list of lines
+
+    patch_test = Rectangle((100, 100), EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, color='orange', alpha=0.0)
+    patch_test.set_animated(True)
+    ax.add_patch(patch_test)
+
 
     def init():
         for line in lines:
@@ -109,13 +114,15 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             prob_matrix_scatter.remove(scatter)
 
         matrix = prob_matrix_history[i]
+        patch_test.set()
         print("prob animation iter " + str(i))
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
-                prob_matrix_scatter.append(
-                    ax.add_patch(Rectangle((k * EXPLORATION_REGION_WIDTH, j * EXPLORATION_REGION_HEIGTH),
-                                           EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, alpha=matrix[j][k],
-                                           color="orange")))
+                if j != 100 and k != 100:
+                    prob_matrix_scatter.append(
+                        ax.add_patch(Rectangle((k * EXPLORATION_REGION_WIDTH, j * EXPLORATION_REGION_HEIGTH),
+                                            EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, alpha=matrix[j][k],
+                                            color="orange")))
 
         colors = ['green' if user.coverage_history[i] else 'red' for user in users]
         markers = ['^' if user.coverage_history[i] else 'x' for user in users]

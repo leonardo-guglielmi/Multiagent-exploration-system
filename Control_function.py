@@ -19,7 +19,7 @@ class Control_function:
         # used for agents connectivity test
         self.__sensors_graph = None
         self.__is_connected_flag = False
-        self.__update_sensors_graph()
+        self.update_sensors_graph()
 
         self.max_dist_for_coverage = (PATH_GAIN / (
                 DESIRED_COVERAGE_LEVEL * PSDN * BANDWIDTH / TRANSMITTING_POWER)) ** 0.5
@@ -33,11 +33,11 @@ class Control_function:
     # ---------------------------------
     # Methods for agents connectivity
     # ---------------------------------
-    def __update_sensors_graph(self):
-        self.__sensors_graph = self.__calculate_graph()
-        self.__is_connected_flag = self.__is_connected(self.__sensors_graph)
+    def update_sensors_graph(self):
+        self.__sensors_graph = self.calculate_graph()
+        self.__is_connected_flag = self.is_connected(self.__sensors_graph)
 
-    def __calculate_graph(self):
+    def calculate_graph(self):
         sensors = self.base_stations + self.agents
 
         graph = numpy.zeros((len(sensors), len(sensors)))
@@ -52,10 +52,10 @@ class Control_function:
         return graph
 
     def connection_test(self):
-        return self.__is_connected(self.__calculate_graph())
+        return self.is_connected(self.calculate_graph())
 
     @staticmethod
-    def __is_connected(graph):
+    def is_connected(graph):
         # uses algebraic connectivity
         laplacian = numpy.zeros((len(graph), len(graph)))
         for i in range(len(graph)):
@@ -77,7 +77,7 @@ class Control_function:
                 agent.set_x(agent.get_x() + (MAX_DISPLACEMENT * delta_x) / distance)
                 agent.set_y(agent.get_y() + (MAX_DISPLACEMENT * delta_y) / distance)
             agent.trajectory.append(agent.get_2D_position())
-            self.__update_sensors_graph()
+            self.update_sensors_graph()
 
     # ---------------------------------
     # methods for the signal analysis
@@ -105,7 +105,7 @@ class Control_function:
         return interference_power
 
     # returns a matrix that associate at each user the SINR of each agent
-    def __SINR(self, interference_powers):
+    def SINR(self, interference_powers):
         SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(self.total_users)))
 
         for sensor in self.agents + self.base_stations:
@@ -118,7 +118,7 @@ class Control_function:
     # methods for the RCR
     # ---------------------------------
 
-    def __RCR(self, SINR_matrix, set_flag=False):
+    def RCR(self, SINR_matrix, set_flag=False):
         RCR = 0
         if self.connection_test():
             total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
@@ -144,8 +144,8 @@ class Control_function:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.interference_power(sensor, user, self.agents)
 
-        SINR_matrix = self.__SINR(interference_powers)
-        return self.__RCR(SINR_matrix, True)
+        SINR_matrix = self.SINR(interference_powers)
+        return self.RCR(SINR_matrix, True)
 
     # ----------------------------------
     # method that samples new points
@@ -231,8 +231,8 @@ class Control_function:
                     temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(
                         agent, user)
 
-            SINR_matrix = self.__SINR(temporary_interference_powers)
-            total_coverage_level = self.__RCR(SINR_matrix)
+            SINR_matrix = self.SINR(temporary_interference_powers)
+            total_coverage_level = self.RCR(SINR_matrix)
             new_expl_level = self.test_calcolo_parziale(agent)
 
             # skip: questo non ti riguarda
