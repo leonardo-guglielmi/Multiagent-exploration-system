@@ -1,1 +1,1 @@
-list.remove(x): x not in list
+list index out of range

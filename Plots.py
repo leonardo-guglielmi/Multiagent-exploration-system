@@ -5,10 +5,11 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from Constants import *
 import os
+import numpy
 
 user_scatter = []
 agent_scatter = []
-prob_matrix_scatter = []
+patch_grid = [[]]
 
 
 # todo: start using ax. instead of plt. for function calling
@@ -39,27 +40,29 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     lines = [ax.plot([], [], lw=0.7)[0] for _ in
              trajectories]  # [0] allow to work directly with Line2D objects, not with list of lines
 
-    patch_test = Rectangle((100, 100), EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, color='orange', alpha=0.0)
-    patch_test.set_animated(True)
-    ax.add_patch(patch_test)
-
-
     def init():
         for line in lines:
             line.set_data([], [])
         return lines
 
-    # todo: add statically patches and update them with patch.set()
     def init_prob():
         for line in lines:
             line.set_data([], [])
 
+        global patch_grid
         matrix = prob_matrix_history[0]
+        patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange")
+                       for k in range(matrix.shape[1])]
+                      for j in range(matrix.shape[0])]
+
+        # first index is for x-axis, second index for y-axis
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
-                ax.add_patch(Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                       EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, color="orange"))
-        return lines  # + patches
+                ax.add_patch(patch_grid[j][k])
+                patch_grid[j][k].set(alpha=matrix[j][k])
+
+        return lines
 
     def animate(i):
         # this two ifs are used to clear the plot from the precedent frame
@@ -108,21 +111,16 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             scatter.remove()
             agent_scatter.remove(scatter)
 
-        global prob_matrix_scatter
-        for scatter in prob_matrix_scatter[:]:
-            scatter.remove()
-            prob_matrix_scatter.remove(scatter)
-
         matrix = prob_matrix_history[i]
-        patch_test.set()
+        with open("prob_matrices.txt", "a") as f:
+            f.write(numpy.array2string(matrix, precision=6))
+
+
         print("prob animation iter " + str(i))
+        global patch_grid
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
-                if j != 100 and k != 100:
-                    prob_matrix_scatter.append(
-                        ax.add_patch(Rectangle((k * EXPLORATION_REGION_WIDTH, j * EXPLORATION_REGION_HEIGTH),
-                                            EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, alpha=matrix[j][k],
-                                            color="orange")))
+                patch_grid[j][k].set_alpha(matrix[j][k])
 
         colors = ['green' if user.coverage_history[i] else 'red' for user in users]
         markers = ['^' if user.coverage_history[i] else 'x' for user in users]
@@ -133,9 +131,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         # draw users' trajectory
         for agent, trajectory in zip(agents, trajectories):
             xa, ya = trajectory[i]
-            print(f"agent position: {xa},{ya}")
             agent_scatter.append(plt.scatter(xa, ya, color='black'))
-
 
         # used for the final coverage image
         if i == 0:
@@ -152,7 +148,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
     ani.save(f'Plots/{type_of_search} search/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
-    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init, frames=len(trajectories[0]), interval=200,
+    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200,
                                        blit=True)
     ani_prob.save(f'Plots/{type_of_search} search/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 

@@ -83,6 +83,7 @@ class Control_function:
     # methods for the signal analysis
     # ---------------------------------
 
+    # todo: change base station height so you won't need this if
     @staticmethod
     def channel_gain(current_sensor, current_user):
         # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
