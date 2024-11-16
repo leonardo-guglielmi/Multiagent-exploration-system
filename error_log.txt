@@ -1,1 +1,1 @@
-alpha (1.0999999999999999) is outside 0-1 range
+index 33 is out of bounds for axis 0 with size 33
