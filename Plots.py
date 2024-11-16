@@ -6,6 +6,7 @@ from matplotlib.patches import Rectangle
 from Constants import *
 import os
 import numpy
+from numpy import random as rnd
 
 user_scatter = []
 agent_scatter = []
@@ -15,6 +16,7 @@ patch_grid = [[]]
 # todo: start using ax. instead of plt. for function calling
 def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history):
     fig, ax = plt.subplots()
+    plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
 
     users_x, users_y = zip(*[user.get_position() for user in users])
@@ -48,11 +50,10 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     def init_prob():
         for line in lines:
             line.set_data([], [])
-
         global patch_grid
         matrix = prob_matrix_history[0]
         patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange")
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange", alpha=0)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
 
@@ -60,7 +61,6 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
                 ax.add_patch(patch_grid[j][k])
-                patch_grid[j][k].set(alpha=matrix[j][k])
 
         return lines
 
@@ -112,15 +112,12 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             agent_scatter.remove(scatter)
 
         matrix = prob_matrix_history[i]
-        with open("prob_matrices.txt", "a") as f:
-            f.write(numpy.array2string(matrix, precision=6))
-
-
         print("prob animation iter " + str(i))
         global patch_grid
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
                 patch_grid[j][k].set_alpha(matrix[j][k])
+                #print(matrix[j][k])
 
         colors = ['green' if user.coverage_history[i] else 'red' for user in users]
         markers = ['^' if user.coverage_history[i] else 'x' for user in users]
@@ -133,22 +130,16 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             xa, ya = trajectory[i]
             agent_scatter.append(plt.scatter(xa, ya, color='black'))
 
-        # used for the final coverage image
-        if i == 0:
-            plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/initial coverage prob.png')
+        os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/'), exist_ok=True)
+        plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/frame_{i}.png')
 
-        if i == len(trajectories[0]) - 1:
-            for line, trajectory in zip(lines, trajectories):
-                x_coord = [coord[0] for coord in trajectory[:i + 1]]
-                y_coord = [coord[1] for coord in trajectory[:i + 1]]
-                line.set_data(x_coord, y_coord)
-            plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/final coverage prob.png')
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
     ani.save(f'Plots/{type_of_search} search/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
-    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200,
+    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]),
+                                       interval=200,
                                        blit=True)
     ani_prob.save(f'Plots/{type_of_search} search/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
@@ -190,3 +181,4 @@ def plot_rewards_comparison(rewards):
     plt.ylabel('Reward')
     plt.savefig(f'Plots/rewards_graphic_comparison.png')
     plt.show()
+

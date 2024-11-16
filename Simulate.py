@@ -6,6 +6,7 @@ from Area import Area
 from User import User
 from Constants import *
 from timeit import default_timer as timer
+import copy
 
 
 def simulate(type_of_search, num_of_iter, deserialize):
@@ -45,7 +46,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
 
     current_expl = cf.exploration_level()
     exploration_levels.append(current_expl)
-    prob_matrix_history.append(cf.pd_matrix.matrix)
+    prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
 
     print("Start coverage level: ", current_reward)
     print("Start exploration level: ", current_expl)
@@ -67,7 +68,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
         # and the exploration matrix is updated
         cf.move_agents()
         cf.pd_matrix.update(cf)
-        prob_matrix_history.append(cf.pd_matrix.matrix)
+        prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
 
         # at the end RCR and exploration level are updated, each user's is_covered flag is assigned
         current_reward = cf.RCR_after_move()

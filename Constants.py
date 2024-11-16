@@ -1,17 +1,17 @@
 # constants for the simulation taken from ///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Deep_Reinforcement_Learning-Based_Effective_Coverage_Control_With_Connectivity_Constraints%20(1)%20(1).pdf
 # and from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
 
-NUM_OF_SAMPLES = 25  # number of points each agent generates as potentially new positions (default: 250, test: 25)
+NUM_OF_SAMPLES = 250  # number of points each agent generates as potentially new positions (default: 250, test: 25)
 EPSILON = 0.1  # percentage of how the agent moves in the chosen direction
 COMMUNICATION_RADIUS = 200  # of the agent
 DESIRED_COVERAGE_LEVEL = 0.5  # by the user
 MAX_DISPLACEMENT = 10  # max distance an agent can move from its actual position
-NUM_OF_ITERATIONS = 30  # max num of iterations before the algorithm stops (default: 100, test: 30)
+NUM_OF_ITERATIONS = 100  # max num of iterations before the algorithm stops (default: 100, test: 30)
 MIN_VERTICAL_DISTANCE = 0.15  # in meters
 SENSOR_HEIGHT = 0.15  # in meters
 
 M = 30  # number of users
-N = 1  # number of agents
+N = 10  # number of agents
 B = 4  # number of base stations
 PENALTY = 1/M  # const for penalty search
 
@@ -31,10 +31,10 @@ TRANSMITTING_POWER = 0.2  # in Watts
 # todo: improve this constants description
 # constants for exploration
 EXPLORATION_FACTOR = 0.4  # rho in the model
-USER_DISCONNECTION_PROBABILITY = 0.01  # Pd in the model
+USER_DISCONNECTION_PROBABILITY = 0.01  # Pd in the model (maybe I should negate it)
 USER_APPEARANCE_PROBABILITY = 0.3  # Pb in the model
 NUM_ITER_BEFORE_EXPIRE = 3  # not used yet
-EXPLORATION_REGION_WIDTH = 50  # (default: 20, test: 50)
-EXPLORATION_REGION_HEIGTH = 50  # (default: 20, test: 50)
+EXPLORATION_REGION_WIDTH = 30  # (default: 20, test: 50)
+EXPLORATION_REGION_HEIGTH = 30  # (default: 20, test: 50)
 AREA_WIDTH = 1000
 AREA_LENGTH = 1000
