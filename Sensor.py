@@ -62,7 +62,7 @@ class Agent(Sensor):
 
 
 class Base_station(Sensor):
-    def __init__(self, area, communication_radius, x, y, transmitting_power, interference_by_bs=False, altitude=0):
+    def __init__(self, area, communication_radius, x, y, transmitting_power, interference_by_bs=False, altitude=0.5):
         super().__init__(area, communication_radius, transmitting_power, altitude)
 
         # setting if the base station can interfere with agents

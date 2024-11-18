@@ -23,8 +23,6 @@ Il tante volte mi muovo facendo dei passettini inutili (per esempio quando ho ra
 
 >> ROAD MAP POST-RICEVIMENTO
 - implementa il calcolo senza le interferenze e vedi quanto ci mette (in questo non usare il quadrato riduttivo)
-- usa Pb=0.3 senza dividere per la cardinalità delle celle
-- implementa un'animazione in cui ci vede con un gradiente (modifica l'alfa) la probabilità di una cella e di come esse variano nel tempo
 - fai la simulazione per bene
 - implementa un rho variabile nel tempo (vedi quando conviene un tipo di tasso di decrescita piuttosto che un altro)
 - simulazione

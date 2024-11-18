@@ -6,7 +6,7 @@ import copy
 # keep memory of how probably there is an uncovered user in that region
 class Probability_distribution_matrix:
 
-    def __init__(self, region_width, region_length, users_list):
+    def __init__(self, region_width, region_length, users_list, type_of_expl):
         self.matrix = numpy.zeros((int(AREA_WIDTH/region_width), int(AREA_LENGTH/region_length)))
         self.users_list = copy.deepcopy(users_list)
 

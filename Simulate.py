@@ -38,7 +38,8 @@ def simulate(type_of_search, num_of_iter, deserialize):
     # probability distribution matrix history
     prob_matrix_history = []
 
-    cf = Control_function(area, base_stations, agents, users)
+    # type of expl: simple, interference
+    cf = Control_function(area, base_stations, agents, users, "simple")
 
     # starting points for coverage & exploration levels
     current_reward = cf.RCR_after_move()
@@ -75,7 +76,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
         cf.pd_matrix.update(cf)
         prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
 
-        current_expl = cf.exploration_level()
+        current_expl = cf.exploration_level(cf.pd_matrix.matrix)
         exploration_levels.append(current_expl)
 
         # skip: questo non ti riguarda

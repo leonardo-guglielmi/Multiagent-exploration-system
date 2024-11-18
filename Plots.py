@@ -112,7 +112,6 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             agent_scatter.remove(scatter)
 
         matrix = prob_matrix_history[i]
-        print("prob animation iter " + str(i))
         global patch_grid
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
