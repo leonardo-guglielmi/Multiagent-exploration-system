@@ -1,1 +1,1 @@
-index 33 is out of bounds for axis 0 with size 33
+[WinError 2] Impossibile trovare il file specificato: 'C:\\Users\\gugli\\Desktop\\tesi\\Plots\\systematic search\\0'

@@ -135,6 +135,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
+    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     ani.save(f'Plots/{type_of_search} search/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
     ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]),

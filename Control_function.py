@@ -201,7 +201,7 @@ class Control_function:
     # ---------------------------------
     # method that choose between the sampled points in the method above
     # ---------------------------------
-    def find_goal_point_for_agent(self, agent, other_agents, type_of_search, t):
+    def find_goal_point_for_agent(self, agent, other_agents, type_of_search, type_of_exploration_factor, t):
         best_point = None
         best_reward = -1
 
@@ -244,7 +244,7 @@ class Control_function:
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            reward_under_test = total_coverage_level + EXPLORATION_FACTOR * new_expl_level
+            reward_under_test = total_coverage_level + self.exploration_factor(type_of_exploration_factor, t) * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
                         agent.get_2D_position(), best_point)):
@@ -263,7 +263,7 @@ class Control_function:
         expl = prob_matrix.size
         for i in range(prob_matrix.shape[0]):
             for j in range(prob_matrix.shape[1]):
-                expl -= prob_matrix.matrix[i, j]
+                expl -= prob_matrix[i, j]
         return expl / prob_matrix.size
 
     # just checks if one cell is covered
@@ -275,8 +275,9 @@ class Control_function:
                 x = cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2
                 y = cell_y * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2
                 for agent in self.agents:
-                    if math.dist(agent.get_3D_position(), (x, y, 0)) < self.max_dist_for_coverage:
+                    if math.dist(agent.get_3D_position(), (x, y, 0)) < agent.communication_radius:
                         result = True
+                        break
 
             if self.type_of_expl == "interference":
                 # create fake user in the middle of the cell for the interference_power() function
@@ -308,7 +309,6 @@ class Control_function:
         exploration_level = 0
 
         if self.type_of_expl == "simple":
-            # todo: check if it's correct
             tmp_matrix = copy.deepcopy(self.pd_matrix)
             tmp_matrix.update(self)
             exploration_level = self.exploration_level(tmp_matrix.matrix)
@@ -362,3 +362,15 @@ class Control_function:
                     exploration_level += user.probability
 
         return exploration_level
+
+    @staticmethod
+    def exploration_factor(type_of_factor, t):
+        if type_of_factor == "constant":
+            return EXPLORATION_FACTOR
+
+        elif type_of_factor == "linear":
+            return 1-t/NUM_OF_ITERATIONS
+
+        else:
+            return 0
+

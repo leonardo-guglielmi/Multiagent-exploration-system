@@ -45,7 +45,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     current_reward = cf.RCR_after_move()
     coverage_levels.append(current_reward)
 
-    current_expl = cf.exploration_level()
+    current_expl = cf.exploration_level(cf.pd_matrix.matrix)
     exploration_levels.append(current_expl)
     prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
 
@@ -63,7 +63,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
         for agent in agents:
             other_agents = [a for a in agents if a.id != agent.id]
-            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, type_of_search, t)
+            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, type_of_search, "simple", t)
 
         # every t the agents are moved in the direction of the goal point calculated by the control function
         # and the exploration matrix is updated
