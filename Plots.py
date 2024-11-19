@@ -20,9 +20,9 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
 
     users_x, users_y = zip(*[user.get_position() for user in users])
-    base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
 
-    plt.scatter(base_stations_x, base_stations_y, color='blue')
+    base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
+    plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
 
     plt.xlim(0, area.width)
     plt.ylim(0, area.length)
@@ -53,7 +53,8 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         global patch_grid
         matrix = prob_matrix_history[0]
         patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange", alpha=0)
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange",
+                                 alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
 
@@ -81,12 +82,12 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
         # draw users' markers
         for xu, yu, color2, marker in zip(users_x, users_y, colors, markers):
-            user_scatter.append(plt.scatter(xu, yu, color=color2, marker=marker))
+            user_scatter.append(plt.scatter(xu, yu, color=color2, marker=marker, zorder=2))
 
         # draw users' trajectory
         for agent, trajectory in zip(agents, trajectories):
             xa, ya = trajectory[i]
-            agent_scatter.append(plt.scatter(xa, ya, color='black'))
+            agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
         # used for the final coverage image
         if i == 0:
@@ -116,18 +117,17 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
                 patch_grid[j][k].set_alpha(matrix[j][k])
-                #print(matrix[j][k])
 
         colors = ['green' if user.coverage_history[i] else 'red' for user in users]
         markers = ['^' if user.coverage_history[i] else 'x' for user in users]
         # draw users' markers
         for xu, yu, color, marker in zip(users_x, users_y, colors, markers):
-            user_scatter.append(plt.scatter(xu, yu, color=color, marker=marker))
+            user_scatter.append(plt.scatter(xu, yu, color=color, marker=marker, zorder=2))
 
         # draw users' trajectory
         for agent, trajectory in zip(agents, trajectories):
             xa, ya = trajectory[i]
-            agent_scatter.append(plt.scatter(xa, ya, color='black'))
+            agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
         os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/'), exist_ok=True)
         plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/frame_{i}.png')
