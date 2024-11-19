@@ -32,7 +32,7 @@ TRANSMITTING_POWER = 0.2  # in Watts
 # constants for exploration
 EXPLORATION_FACTOR = 0.4  # rho in the model
 USER_DISCONNECTION_PROBABILITY = 0.01  # Pd in the model (maybe I should negate it)
-USER_APPEARANCE_PROBABILITY = 0.3  # Pb in the model (0.1)
+USER_APPEARANCE_PROBABILITY = 0.1  # Pb in the model
 NUM_ITER_BEFORE_EXPIRE = 3  # not used yet
 EXPLORATION_REGION_WIDTH = 20  # (default: 20, test: 50)
 EXPLORATION_REGION_HEIGTH = 20  # (default: 20, test: 50)

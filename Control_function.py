@@ -28,7 +28,7 @@ class Control_function:
         self.type_of_expl = type_of_expl
         self.pd_matrix = Exploration.Probability_distribution_matrix(EXPLORATION_REGION_WIDTH,
                                                                      EXPLORATION_REGION_HEIGTH,
-                                                                     total_users, type_of_expl)
+                                                                     total_users)
         self.pd_matrix.update(self)
 
     # ---------------------------------
