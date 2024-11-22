@@ -1,5 +1,5 @@
 import pickle
-from Plots import plot_area, plot_rewards, plot_exploration
+from Plots import plot_area, plot_coverage, plot_exploration
 from Control_function import Control_function
 from Sensor import Agent, Base_station
 from Area import Area
@@ -39,15 +39,16 @@ def simulate(type_of_search, num_of_iter, deserialize):
     prob_matrix_history = []
 
     # type of expl: simple, interference
-    cf = Control_function(area, base_stations, agents, users, "simple")
+    cf = Control_function(area, base_stations, agents, users, "simple", "constant")
 
     # starting points for coverage & exploration levels
     current_reward = cf.RCR_after_move()
     coverage_levels.append(current_reward)
 
-    current_expl = cf.exploration_level(cf.pd_matrix.matrix)
+    cf.update_probability_distribution_matrix()
+    current_expl = cf.get_exploration_level()
     exploration_levels.append(current_expl)
-    prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
+    prob_matrix_history.append(cf.get_prob_matrix_snapshot())
 
     print("Start coverage level: ", current_reward)
     print("Start exploration level: ", current_expl)
@@ -63,7 +64,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
         for agent in agents:
             other_agents = [a for a in agents if a.id != agent.id]
-            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, type_of_search, "simple", t)
+            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, type_of_search, t)
 
         # every t the agents are moved in the direction of the goal point calculated by the control function
         # and the exploration matrix is updated
@@ -73,13 +74,12 @@ def simulate(type_of_search, num_of_iter, deserialize):
         current_reward = cf.RCR_after_move()
         coverage_levels.append(current_reward)
 
-        cf.pd_matrix.update(cf)
-        prob_matrix_history.append(copy.deepcopy(cf.pd_matrix.matrix))
+        cf.update_probability_distribution_matrix()
+        prob_matrix_history.append(cf.get_prob_matrix_snapshot())
 
-        current_expl = cf.exploration_level(cf.pd_matrix.matrix)
+        current_expl = cf.get_exploration_level()
         exploration_levels.append(current_expl)
 
-        # skip: questo non ti riguarda
         t += 1
         if type_of_search == "mixed" and t == int(NUM_OF_ITERATIONS / 2):
             type_of_search = "systematic mixed"
@@ -89,13 +89,21 @@ def simulate(type_of_search, num_of_iter, deserialize):
     end = timer()
 
     time_elapsed = end - start
-    # final output
+    # final CLI output
     print("Time elapsed: ", time_elapsed)
     print("Final coverage level: ", current_reward)
     print("Final exploration level: ", current_expl)
     if type_of_search == "systematic mixed":
         type_of_search = "mixed"
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
-    plot_rewards(coverage_levels, time_elapsed, type_of_search, num_of_iter)
-    plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
+
+    # saving results with pickle files
     pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))
+    # todo: questi due spostati dal modulo plot, vedi se funziona lo stesso
+    pickle.dump(coverage_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
+    pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
+
+    # plotting results
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
+    plot_coverage(coverage_levels, time_elapsed, type_of_search, num_of_iter)
+    plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
+

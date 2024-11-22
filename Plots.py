@@ -1,12 +1,9 @@
-import pickle
 import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from Constants import *
 import os
-import numpy
-from numpy import random as rnd
 
 user_scatter = []
 agent_scatter = []
@@ -15,18 +12,14 @@ patch_grid = [[]]
 
 # todo: start using ax. instead of plt. for function calling
 def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history):
+    # define plot properties
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
-
-    users_x, users_y = zip(*[user.get_position() for user in users])
-
-    base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
-    plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
-
     plt.xlim(0, area.width)
     plt.ylim(0, area.length)
 
+    # define plot legend
     users_label = Line2D([0], [0], marker='x', color='red', label='Utenti non coperti', markerfacecolor='red',
                          markersize=6, linestyle='None')
     covered_users_label = Line2D([0], [0], marker='^', color='green', label='Utenti coperti', markerfacecolor='green',
@@ -38,10 +31,18 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     plt.legend(handles=[users_label, covered_users_label, base_stations_label, agents_label], bbox_to_anchor=(0.7, 1.3),
                loc='upper right')
 
-    trajectories = [agent.trajectory for agent in agents]
-    lines = [ax.plot([], [], lw=0.7)[0] for _ in
-             trajectories]  # [0] allow to work directly with Line2D objects, not with list of lines
+    # extract and display first elements
+    users_x, users_y = zip(*[user.get_position() for user in users])
 
+    base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
+    plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
+
+    # todo: improve?
+    trajectories = [agent.trajectory for agent in agents]
+    lines = [ax.plot([], [], lw=0.7)[0] for _ in trajectories]
+    # [0] allow to work directly with Line2D objects, not with list of lines
+
+    # todo: try to remove this and see what happen, I think it would be ok anyway
     def init():
         for line in lines:
             line.set_data([], [])
@@ -50,15 +51,16 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     def init_prob():
         for line in lines:
             line.set_data([], [])
+
         global patch_grid
+        # first index is for x-axis, second index for y-axis
         matrix = prob_matrix_history[0]
         patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="orange",
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="#ff8000",
                                  alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
 
-        # first index is for x-axis, second index for y-axis
         for j in range(matrix.shape[0]):
             for k in range(matrix.shape[1]):
                 ax.add_patch(patch_grid[j][k])
@@ -146,39 +148,37 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     plt.show()
 
 
-def plot_rewards(coverages, time_elapsed, type_of_search, num_of_iter):
+def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
-    plt.ylabel('Coverage')
+    plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
-    pickle.dump(coverages, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
     plt.show()
 
 
 def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
-    plt.xlabel('Iters')
-    plt.ylabel('Exploration')
+    plt.xlabel('Iterations')
+    plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
-    pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
     plt.show()
 
 
-def plot_rewards_comparison(rewards):
+def plot_coverages_comparison(coverages):
     plt.subplots()
-    for reward in rewards:
-        plt.plot(range(len(reward)), reward)
+    for coverage in coverages:
+        plt.plot(range(len(coverage)), coverage)
     plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
     plt.xlabel('Iterations')
-    plt.ylabel('Reward')
-    plt.savefig(f'Plots/rewards_graphic_comparison.png')
+    plt.ylabel('Coverage')
+    plt.savefig(f'Plots/coverages_graphic_comparison.png')
     plt.show()
 
