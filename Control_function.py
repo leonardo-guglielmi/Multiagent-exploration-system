@@ -8,7 +8,7 @@ from User import *
 
 
 class Control_function:
-    def __init__(self, area, base_stations, agents, users, type_of_expl, type_expl_weight):
+    def __init__(self, area, base_stations, agents, users, dto):
         # initialization of all actors in the simulation
         self.area = area
         self.base_stations = base_stations
@@ -27,9 +27,11 @@ class Control_function:
         # attributes used for exploration
         # ----
 
-        # Strings that specifies the type of exploration
-        self.type_of_expl = type_of_expl
-        self.type_expl_weight = type_expl_weight
+        # extracting dto information
+        self.type_of_search = dto.type_of_search
+        self.type_of_coverage = dto.type_of_coverage
+        self.type_of_exploration = dto.type_of_exploration
+        self.type_of_expl_weight = dto.type_of_expl_weight
 
         # Matrix that correlates each cell with the likelihood of a user in that area
         self.__prob_matrix = numpy.zeros(
@@ -165,6 +167,19 @@ class Control_function:
 
         return RCR / len(self.users)
 
+    def __RCR_no_interference(self, set_flag=False):
+        RCR = 0
+        if self.__connection_test():
+            for user in self.users:
+                user_covered_flag = False
+                for sensor in self.agents + self.base_stations:
+                    if math.dist(sensor.get_3D_position(), user.get_3D_position()) > sensor.communication_radius:
+                        RCR += 1
+                        user_covered_flag = True
+                if set_flag:
+                    user.set_is_covered(user_covered_flag)
+        return RCR / len(self.users)
+
     # returns the RCR after an agent moves
     def RCR_after_move(self):
         interference_powers = [[0 for _ in range(len(self.users))] for _ in
@@ -179,7 +194,7 @@ class Control_function:
     # ----------------------------------
     # method that samples new points
     # ----------------------------------
-    def get_points(self, agent, other_agents, type_of_search, t):
+    def get_points(self, agent, other_agents, t):
 
         points_x = []
         points_y = []
@@ -202,7 +217,7 @@ class Control_function:
 
         points = list(zip(points_x, points_y))
 
-        if type_of_search == "local" or type_of_search == "mixed":
+        if self.type_of_search == "local" or self.type_of_search == "mixed":
             # elimina i punti che sono più vicini a un altro agente rispetto all'agente corrente
             # problemi: questa metodologia predilige la ricerca locale, senza possibilità di cercare lontano
             new_points = copy.deepcopy(points)
@@ -213,7 +228,7 @@ class Control_function:
                         break
             points = new_points
 
-        if type_of_search == "annealing forward" or type_of_search == "annealing reverse":
+        if self.type_of_search == "annealing forward" or self.type_of_search == "annealing reverse":
             # tanto più è la distanza tra il punto campionato e l'agente corrente, tanto più è bassa la probabilità di
             # accettare il punto, oltre al fatto che la prob si riduce con il passare delle iterazioni
             # simulated annealing
@@ -224,7 +239,7 @@ class Control_function:
                                                                                                  agent.get_2D_position())
                     # man mano che t aumenta, la probabilità di rimuovere un punto lontano diminuisce
                     if delta_distance < 0 and random.random() < (
-                            t / NUM_OF_ITERATIONS if type_of_search == "annealing forward" else 1 - t / NUM_OF_ITERATIONS):
+                            t / NUM_OF_ITERATIONS if self.type_of_search == "annealing forward" else 1 - t / NUM_OF_ITERATIONS):
                         new_points.remove(point)
                         break
             points = new_points
@@ -233,7 +248,7 @@ class Control_function:
     # ---------------------------------
     # method that choose between the sampled points of an agent
     # ---------------------------------
-    def find_goal_point_for_agent(self, agent, other_agents, type_of_search, t):
+    def find_goal_point_for_agent(self, agent, other_agents, t):
         best_point = None
         best_reward = -1
 
@@ -246,7 +261,7 @@ class Control_function:
 
         # iters through new sampled points and the actual position (it may don't move)
         i = 0
-        for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, type_of_search, t):
+        for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, t):
 
             temporary_interference_powers = copy.deepcopy(partial_interference_powers)
 
@@ -261,21 +276,21 @@ class Control_function:
                         agent, user)
 
             SINR_matrix = self.__SINR(temporary_interference_powers)
-            total_coverage_level = self.__RCR(SINR_matrix)
+            new_coverage_level = self.__RCR(SINR_matrix)
             new_expl_level = self.__evaluate_new_exploration(agent)
 
-            if type_of_search == "penalty":
+            if self.type_of_search == "penalty":
                 # se il punto è troppo vicino a un punto in cui c'è gia un altro agente -> penalità
                 for other_agent in other_agents:
                     if math.dist(point, other_agent.get_2D_position()) < math.dist(point, agent.get_2D_position()):
                         # per ogni agente più vicino al punto campionato, decrementa la copertura totale di 1/len(users)
-                        total_coverage_level -= PENALTY
+                        new_coverage_level -= PENALTY
                         break
 
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            reward_under_test = total_coverage_level + self.exploration_factor(self.type_expl_weight, t) * new_expl_level
+            reward_under_test = new_coverage_level + self.exploration_factor(self.type_of_expl_weight, t) * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
                         agent.get_2D_position(), best_point)):
@@ -312,17 +327,19 @@ class Control_function:
         result = False
         point = self.get_cell_center(cell_x, cell_y) + (0,)
 
-        if self.__connection_test():
+        # using flag because __connection_test() already called in __RCR(), if it's not the case the connection test must
+        # be called here
+        if self.__is_connected_flag:
 
             # simpler method, a exploration cell is considered explored when it's center is near to some sensor
-            if self.type_of_expl == "simple":
+            if self.type_of_exploration == "simple":
                 for agent in self.agents:
                     if math.dist(agent.get_3D_position(), point) < agent.communication_radius:
                         result = True
                         break
 
             # this method takes into account interferences from other sensor to decide if a cell is explored or not
-            if self.type_of_expl == "interference":
+            if self.type_of_exploration == "interference":
                 sensors_interference = [0 for _ in self.agents + self.base_stations]
                 for sensor in self.agents + self.base_stations:
                     sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point, self.agents + self.base_stations)
@@ -347,14 +364,14 @@ class Control_function:
         exploration_level = 0
 
         # examines how agent's movement modifies probability
-        if self.type_of_expl == "simple":
+        if self.type_of_exploration == "simple":
             tmp_matrix = copy.deepcopy(self.__prob_matrix)
             self.__update_prob_matrix(tmp_matrix)
             exploration_level = self.exploration_level(tmp_matrix)
 
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
-        if self.type_of_expl == "interference":
+        if self.type_of_exploration == "interference":
 
             # control to not exceed area limits
             inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
@@ -398,11 +415,10 @@ class Control_function:
                             interference_powers[sensor.id][k] + PSDN * BANDWIDTH)
 
             max_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
-            k = 0
-            for point in points:
+
+            for k in range(len(max_SINR_per_user)):
                 if max_SINR_per_user[k] > DESIRED_COVERAGE_LEVEL:
                     exploration_level += probs[k]
-                k += 1
 
         return exploration_level
 
@@ -447,4 +463,3 @@ class Control_function:
     # returns a snapshot of prob_matrix
     def get_prob_matrix_snapshot(self):
         return copy.deepcopy(self.__prob_matrix)
-

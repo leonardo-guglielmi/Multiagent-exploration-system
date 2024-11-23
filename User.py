@@ -32,6 +32,9 @@ class User:
     def get_position(self):
         return self.__x, self.__y
 
+    def get_3D_position(self):
+        return self.get_position() + (0,)
+
     def set_position(self, x, y):
         self.__x = x
         self.__y = y

@@ -6,7 +6,7 @@ from Area import Area
 from User import User
 from Constants import *
 from timeit import default_timer as timer
-import copy
+from Contro_function_config_DTO import Control_function_DTO as DTO
 
 
 def simulate(type_of_search, num_of_iter, deserialize):
@@ -16,7 +16,9 @@ def simulate(type_of_search, num_of_iter, deserialize):
 
     area = Area(AREA_WIDTH, AREA_LENGTH)
 
-    agents = [Agent(area, COMMUNICATION_RADIUS, TRANSMITTING_POWER, ALTITUDE + i * SENSOR_HEIGHT + MIN_VERTICAL_DISTANCE, deserialize) for i in range(N)]
+    agents = [
+        Agent(area, COMMUNICATION_RADIUS, TRANSMITTING_POWER, ALTITUDE + i * SENSOR_HEIGHT + MIN_VERTICAL_DISTANCE,
+              deserialize) for i in range(N)]
 
     # by default a base station does not interfere with the communication of the other agents
     b1 = Base_station(area, COMMUNICATION_RADIUS, 1 / 4 * area.width, 1 / 4 * area.length, TRANSMITTING_POWER)
@@ -38,8 +40,11 @@ def simulate(type_of_search, num_of_iter, deserialize):
     # probability distribution matrix history
     prob_matrix_history = []
 
-    # type of expl: simple, interference
-    cf = Control_function(area, base_stations, agents, users, "simple", "constant")
+    dto = DTO(type_of_search=type_of_search,
+              type_of_coverage="simple",
+              type_of_exploration="simple",
+              type_of_expl_weight="constant")
+    cf = Control_function(area, base_stations, agents, users, dto)
 
     # starting points for coverage & exploration levels
     current_reward = cf.RCR_after_move()
@@ -64,7 +69,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
         for agent in agents:
             other_agents = [a for a in agents if a.id != agent.id]
-            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, type_of_search, t)
+            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, t)
 
         # every t the agents are moved in the direction of the goal point calculated by the control function
         # and the exploration matrix is updated
@@ -84,7 +89,8 @@ def simulate(type_of_search, num_of_iter, deserialize):
         if type_of_search == "mixed" and t == int(NUM_OF_ITERATIONS / 2):
             type_of_search = "systematic mixed"
 
-        print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, " exploration_level: ", current_expl)
+        print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, " exploration_level: ",
+              current_expl)
 
     end = timer()
 
@@ -106,4 +112,3 @@ def simulate(type_of_search, num_of_iter, deserialize):
     plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
     plot_coverage(coverage_levels, time_elapsed, type_of_search, num_of_iter)
     plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
-

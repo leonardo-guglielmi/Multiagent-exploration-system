@@ -56,7 +56,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         # first index is for x-axis, second index for y-axis
         matrix = prob_matrix_history[0]
         patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="#ff8000",
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="#ff9900",
                                  alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
