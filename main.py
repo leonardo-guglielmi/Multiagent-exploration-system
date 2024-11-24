@@ -16,7 +16,7 @@ def main():
         for i in range(num_of_simulations):
             deserialize = False
             for type_of_search in types_of_search:
-                print("Starting simulation ", type_of_search, ":", i)
+                print("----- Starting simulation ", type_of_search, ":", i, " -----")
                 simulate(type_of_search, i, deserialize)
                 Sensor.id = 0
                 User.id = 0

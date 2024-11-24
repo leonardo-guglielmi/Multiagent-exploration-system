@@ -155,7 +155,6 @@ def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter):
     plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
     plt.show()
 
@@ -167,7 +166,6 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_it
     plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
     plt.show()
 

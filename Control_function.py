@@ -56,6 +56,7 @@ class Control_function:
         graph = numpy.zeros((len(sensors), len(sensors)))
         for i in range(len(sensors)):
             for j in range(len(sensors)):
+                #
                 # question: non c'é una potenza/radice di troppo?
                 graph[i][j] = 1 if i != j and (
                         (sensors[i].get_x() - sensors[j].get_x()) ** 2 +
@@ -152,7 +153,7 @@ class Control_function:
     # methods for the RCR
     # ---------------------------------
 
-    def __RCR(self, SINR_matrix, set_flag=False):
+    def __RCR_interference(self, SINR_matrix, set_flag=False):
         RCR = 0
         if self.__connection_test():
             total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
@@ -173,23 +174,29 @@ class Control_function:
             for user in self.users:
                 user_covered_flag = False
                 for sensor in self.agents + self.base_stations:
-                    if math.dist(sensor.get_3D_position(), user.get_3D_position()) > sensor.communication_radius:
+                    if math.dist(sensor.get_3D_position(), user.get_3D_position()) < sensor.communication_radius:
                         RCR += 1
                         user_covered_flag = True
+                        break
                 if set_flag:
                     user.set_is_covered(user_covered_flag)
         return RCR / len(self.users)
 
     # returns the RCR after an agent moves
     def RCR_after_move(self):
-        interference_powers = [[0 for _ in range(len(self.users))] for _ in
-                               range(len(self.agents) + len(self.base_stations))]
-        for user in self.users:
-            for sensor in self.agents + self.base_stations:
-                interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
 
-        SINR_matrix = self.__SINR(interference_powers)
-        return self.__RCR(SINR_matrix, True)
+        if self.type_of_coverage == "simple":
+            return self.__RCR_no_interference(True)
+
+        if self.type_of_coverage == "interference":
+            interference_powers = [[0 for _ in range(len(self.users))] for _ in
+                                   range(len(self.agents) + len(self.base_stations))]
+            for user in self.users:
+                for sensor in self.agents + self.base_stations:
+                    interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
+
+            SINR_matrix = self.__SINR(interference_powers)
+            return self.__RCR_interference(SINR_matrix, True)
 
     # ----------------------------------
     # method that samples new points
@@ -252,31 +259,41 @@ class Control_function:
         best_point = None
         best_reward = -1
 
-        # store powers of the actual interference
-        partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
+        # todo: put all interference pre-computation inside RCR function (all of them)
+        if self.type_of_coverage == "interference":
+            # store powers of the actual interference
+            partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
                                        range(len(other_agents) + len(self.base_stations) + 1)]
-        for user in self.users:
-            for sensor in [agent] + other_agents + self.base_stations:
-                partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
+            for user in self.users:
+                for sensor in [agent] + other_agents + self.base_stations:
+                    partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
 
         # iters through new sampled points and the actual position (it may don't move)
         i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, t):
 
-            temporary_interference_powers = copy.deepcopy(partial_interference_powers)
-
             # move the agent and store its old position
             original_position = agent.get_2D_position()
             agent.set_2D_position(point[0], point[1])
 
-            # update interferences power with new agent position
-            for user in self.users:
-                for sensor in other_agents + self.base_stations:
-                    temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(
-                        agent, user)
+            new_coverage_level = 0
 
-            SINR_matrix = self.__SINR(temporary_interference_powers)
-            new_coverage_level = self.__RCR(SINR_matrix)
+            if self.type_of_coverage == "interference":
+                temporary_interference_powers = copy.deepcopy(partial_interference_powers)
+
+                # update interferences power with new agent position
+                for user in self.users:
+                    for sensor in other_agents + self.base_stations:
+                        # question: perché questo calcolo?
+                        temporary_interference_powers[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(
+                            agent, user)
+
+                SINR_matrix = self.__SINR(temporary_interference_powers)
+                new_coverage_level = self.__RCR_interference(SINR_matrix)
+
+            if self.type_of_coverage == "simple":
+                new_coverage_level = self.__RCR_no_interference()
+
             new_expl_level = self.__evaluate_new_exploration(agent)
 
             if self.type_of_search == "penalty":
@@ -290,7 +307,8 @@ class Control_function:
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            reward_under_test = new_coverage_level + self.exploration_factor(self.type_of_expl_weight, t) * new_expl_level
+            reward_under_test = new_coverage_level + self.exploration_factor(self.type_of_expl_weight,
+                                                                             t) * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
                         agent.get_2D_position(), best_point)):
@@ -333,7 +351,7 @@ class Control_function:
 
             # simpler method, a exploration cell is considered explored when it's center is near to some sensor
             if self.type_of_exploration == "simple":
-                for agent in self.agents:
+                for agent in self.agents + self.base_stations:
                     if math.dist(agent.get_3D_position(), point) < agent.communication_radius:
                         result = True
                         break
@@ -342,12 +360,14 @@ class Control_function:
             if self.type_of_exploration == "interference":
                 sensors_interference = [0 for _ in self.agents + self.base_stations]
                 for sensor in self.agents + self.base_stations:
-                    sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point, self.agents + self.base_stations)
+                    sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point,
+                                                                                             self.agents + self.base_stations)
                 sensors_SINR = [0 for _ in self.agents + self.base_stations]
 
                 for sensor in self.agents + self.base_stations:
-                    sensors_SINR[sensor.id] = (self.channel_gain_by_position(sensor.get_3D_position(), point) * sensor.transmitting_power) / (
-                            sensors_interference[sensor.id] + PSDN * BANDWIDTH)
+                    sensors_SINR[sensor.id] = (self.channel_gain_by_position(sensor.get_3D_position(),
+                                                                             point) * sensor.transmitting_power) / (
+                                                      sensors_interference[sensor.id] + PSDN * BANDWIDTH)
                     if sensors_SINR[sensor.id] > DESIRED_COVERAGE_LEVEL:
                         result = True
                         break
@@ -404,18 +424,21 @@ class Control_function:
             k = 0
             for point in points:
                 for sensor in self.agents + self.base_stations:
-                    interference_powers[sensor.id][k] = self.__interference_powers_by_position(sensor.get_3D_position(), point, self.agents)
+                    interference_powers[sensor.id][k] = self.__interference_powers_by_position(sensor.get_3D_position(),
+                                                                                               point, self.agents)
                 k += 1
 
             SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(points)))
             for sensor in self.agents + self.base_stations:
                 k = 0
                 for point in points:
-                    SINR_matrix[sensor.id][k] = (self.channel_gain_by_position(sensor.get_3D_position(), point) * sensor.transmitting_power) / (
-                            interference_powers[sensor.id][k] + PSDN * BANDWIDTH)
+                    SINR_matrix[sensor.id][k] = (self.channel_gain_by_position(sensor.get_3D_position(),
+                                                                               point) * sensor.transmitting_power) / (
+                                                        interference_powers[sensor.id][k] + PSDN * BANDWIDTH)
 
             max_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
 
+            # todo: add proximity advantages
             for k in range(len(max_SINR_per_user)):
                 if max_SINR_per_user[k] > DESIRED_COVERAGE_LEVEL:
                     exploration_level += probs[k]

@@ -1,3 +1,4 @@
+import os
 import pickle
 from Plots import plot_area, plot_coverage, plot_exploration
 from Control_function import Control_function
@@ -103,12 +104,14 @@ def simulate(type_of_search, num_of_iter, deserialize):
         type_of_search = "mixed"
 
     # saving results with pickle files
+    print("Saving simulation data...")
+    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
     pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))
-    # todo: questi due spostati dal modulo plot, vedi se funziona lo stesso
     pickle.dump(coverage_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
     pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
 
     # plotting results
+    print("Plotting results...")
     plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
     plot_coverage(coverage_levels, time_elapsed, type_of_search, num_of_iter)
     plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
