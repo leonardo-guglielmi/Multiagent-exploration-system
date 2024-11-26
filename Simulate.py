@@ -42,7 +42,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     prob_matrix_history = []
 
     dto = DTO(type_of_search=type_of_search,
-              type_of_coverage="simple",
+              type_of_coverage="interference",
               type_of_exploration="simple",
               type_of_expl_weight="constant")
     cf = Control_function(area, base_stations, agents, users, dto)
