@@ -5,7 +5,7 @@ AREA_LENGTH = 1000  # in meters
 # and from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
 NUM_OF_SAMPLES = 250  # number of points each agent generates as potentially new positions (default: 250, test: 25)
 EPSILON = 0.1  # percentage of how the agent moves in the chosen direction
-COMMUNICATION_RADIUS = 120  # of the agent (default: 120)
+COMMUNICATION_RADIUS = 200  # of the agent (default: 200)
 DESIRED_COVERAGE_LEVEL = 0.5  # by the user
 MAX_DISPLACEMENT = 10  # max distance an agent can move from its actual position
 NUM_OF_ITERATIONS = 100  # max num of iterations before the algorithm stops (default: 100, test: 30)

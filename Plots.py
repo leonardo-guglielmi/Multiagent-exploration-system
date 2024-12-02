@@ -11,7 +11,7 @@ patch_grid = [[]]
 
 
 # todo: start using ax. instead of plt. for function calling
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, show_plot=False):
     # define plot properties
     fig, ax = plt.subplots()
     plt.axis('square')
@@ -145,10 +145,11 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
                                        blit=True)
     ani_prob.save(f'Plots/{type_of_search} search/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
-    plt.show()
+    if show_plot:
+        plt.show()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter):
+def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter, show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
@@ -156,10 +157,11 @@ def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter):
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
-    plt.show()
+    if show_plot:
+        plt.show()
 
 
-def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter, show_plot=False):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
@@ -167,10 +169,11 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_it
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
-    plt.show()
+    if show_plot:
+        plt.show()
 
 
-def plot_coverages_comparison(coverages):
+def plot_coverages_comparison(coverages, show_plot=False):
     plt.subplots()
     for coverage in coverages:
         plt.plot(range(len(coverage)), coverage)
@@ -178,5 +181,6 @@ def plot_coverages_comparison(coverages):
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
     plt.savefig(f'Plots/coverages_graphic_comparison.png')
-    plt.show()
+    if show_plot:
+        plt.show()
 
