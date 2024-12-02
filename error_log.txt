@@ -1,1 +1,1 @@
-[Errno 2] No such file or directory: 'Plots/annealing forward search/1/time_elapsed.p'
+max() iterable argument is empty
