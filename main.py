@@ -1,7 +1,8 @@
 import pickle
 import statistics
-
 from Plots import plot_coverage, plot_coverages_comparison
+from datetime import datetime as date
+
 from Simulate import simulate
 from User import User
 from Constants import *
@@ -13,6 +14,7 @@ def main():
         num_of_simulations = 30
         types_of_search = ["systematic", "local", "annealing forward", "annealing reverse", "penalty"]
 
+        print(f"timestamp {date.now()}\n")
         for i in range(num_of_simulations):
             deserialize = False
             for type_of_search in types_of_search:

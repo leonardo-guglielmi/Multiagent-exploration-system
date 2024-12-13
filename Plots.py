@@ -101,6 +101,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
             plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/final coverage.png')
+
         return lines
 
     def animate_prob(i):
@@ -147,6 +148,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
     if show_plot:
         plt.show()
+    plt.close()
 
 
 def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter, show_plot=False):
@@ -159,6 +161,7 @@ def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter, show_plo
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
+    plt.close()
 
 
 def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter, show_plot=False):
@@ -171,6 +174,7 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_it
     plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
+    plt.close()
 
 
 def plot_coverages_comparison(coverages, show_plot=False):
@@ -183,4 +187,4 @@ def plot_coverages_comparison(coverages, show_plot=False):
     plt.savefig(f'Plots/coverages_graphic_comparison.png')
     if show_plot:
         plt.show()
-
+    plt.close()

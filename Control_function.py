@@ -392,7 +392,6 @@ class Control_function:
             self.__update_prob_matrix(tmp_matrix)
             exploration_level = self.exploration_level(tmp_matrix)
 
-        # todo: doesn't works
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
         elif self.type_of_exploration == "interference":
@@ -420,8 +419,7 @@ class Control_function:
             relevant_agents = []
             for sensor in self.agents + self.base_stations:
                 if (sensor != agent
-                        and math.dist(sensor.get_2D_position(), agent.get_2D_position())
-                        <= agent.communication_radius + sensor.communication_radius):
+                        and math.dist(sensor.get_2D_position(), agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
                     relevant_agents.append(sensor)
             relevant_agents.append(agent)
 
