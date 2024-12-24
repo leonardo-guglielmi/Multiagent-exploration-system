@@ -32,6 +32,7 @@ class Control_function:
         self.type_of_coverage = dto.type_of_coverage
         self.type_of_exploration = dto.type_of_exploration
         self.type_of_expl_weight = dto.type_of_expl_weight
+        self.concurrent_mode = dto.is_concurrent
 
         # Matrix that correlates each cell with the likelihood of a user in that area
         self.__prob_matrix = numpy.zeros( (int(AREA_WIDTH / EXPLORATION_REGION_WIDTH),
