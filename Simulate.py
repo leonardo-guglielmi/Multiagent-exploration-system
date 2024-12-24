@@ -7,8 +7,9 @@ from Area import Area
 from User import User
 from Constants import *
 from timeit import default_timer as timer
-from Contro_function_config_DTO import Control_function_DTO as DTO
+from Control_function_config_DTO import Control_function_DTO as DTO
 
+from multiprocessing import Process
 
 def simulate(type_of_search, num_of_iter, deserialize):
     # -----------------------------------------------
@@ -44,7 +45,8 @@ def simulate(type_of_search, num_of_iter, deserialize):
     dto = DTO(type_of_search=type_of_search,
               type_of_coverage="interference",
               type_of_exploration="interference",
-              type_of_expl_weight="constant")
+              type_of_expl_weight="constant",
+              is_concurrent=False)
     cf = Control_function(area, base_stations, agents, users, dto)
 
     # starting points for coverage & exploration levels
@@ -68,6 +70,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     # control function continue to iterate until all users are cover or reach the limit of iterations (NUM_OF_ITERATIONS)
     t = 0  # iter counter (it's the time variable in the mathematical model)
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
+
         for agent in agents:
             other_agents = [a for a in agents if a.id != agent.id]
             agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, t)
@@ -106,8 +109,11 @@ def simulate(type_of_search, num_of_iter, deserialize):
     # saving results with pickle files
     print("Saving simulation data...")
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    # noinspection PyTypeChecker
     pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))
+    # noinspection PyTypeChecker
     pickle.dump(coverage_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
+    # noinspection PyTypeChecker
     pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
 
     # plotting results
