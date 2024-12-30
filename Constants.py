@@ -16,6 +16,7 @@ M = 30  # number of users
 N = 10  # number of agents
 B = 4  # number of base stations
 PENALTY = 1/M  # const for penalty search
+NUM_OF_SIMULATIONS = 30
 
 """ Power Spectral Density Noise """
 PSDN = 7.164E-16  # =-174dBm/Hz

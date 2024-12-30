@@ -188,3 +188,15 @@ def plot_coverages_comparison(coverages, show_plot=False):
     if show_plot:
         plt.show()
     plt.close()
+
+def plot_exploration_comparison(expl_levels, show_plot=False):
+    plt.subplots()
+    for expl in expl_levels:
+        plt.plot(range(len(expl)), expl)
+    plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
+    plt.xlabel('Iterations')
+    plt.ylabel('Coverage')
+    plt.savefig(f'Plots/exploration_graphic_comparison.png')
+    if show_plot:
+        plt.show()
+    plt.close()
