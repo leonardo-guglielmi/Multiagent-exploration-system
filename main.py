@@ -1,6 +1,6 @@
 import pickle
 import statistics
-from Plots import plot_coverage, plot_coverages_comparison
+from Plots import plot_coverage, plot_coverages_comparison, plot_exploration_comparison
 from datetime import datetime as date
 
 from Simulate import simulate
@@ -128,6 +128,7 @@ def main():
                 f.write(str(std_devs_expl[types_of_search_dict[type_of_search]]) + "\n")
 
         plot_coverages_comparison(average_coverages)
+        plot_exploration_comparison(average_expl_levels)
 
     except Exception as e:
         with open("error_log.txt", "w") as f:
