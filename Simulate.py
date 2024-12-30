@@ -80,10 +80,11 @@ def simulate(type_of_search, num_of_iter, deserialize):
 
             for ag in agents:
                 proc_list.append(AgentProcess(cf, ag, t, queue))
-            for thr in proc_list:
-                thr.start()
-            for thr in proc_list:
-                thr.join()
+            for proc in proc_list:
+                proc.start()
+            for proc in proc_list:
+                proc.join()
+                proc.close()
 
             output_list = [(0,0) for _ in range(N+B)]
             while not queue.empty():
