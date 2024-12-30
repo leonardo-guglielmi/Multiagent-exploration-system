@@ -1,5 +1,7 @@
 import os
 import pickle
+from tabnanny import process_tokens
+
 from Plots import plot_area, plot_coverage, plot_exploration
 from Control_function import Control_function
 from Sensor import Agent, Base_station
@@ -9,7 +11,8 @@ from Constants import *
 from timeit import default_timer as timer
 from Control_function_config_DTO import Control_function_DTO as DTO
 
-from multiprocessing import Process
+from AgentProcess import AgentProcess
+from multiprocessing import SimpleQueue
 
 def simulate(type_of_search, num_of_iter, deserialize):
     # -----------------------------------------------
@@ -46,7 +49,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
               type_of_coverage="interference",
               type_of_exploration="interference",
               type_of_expl_weight="constant",
-              is_concurrent=False)
+              is_concurrent=True)
     cf = Control_function(area, base_stations, agents, users, dto)
 
     # starting points for coverage & exploration levels
@@ -71,9 +74,29 @@ def simulate(type_of_search, num_of_iter, deserialize):
     t = 0  # iter counter (it's the time variable in the mathematical model)
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
 
-        for agent in agents:
-            other_agents = [a for a in agents if a.id != agent.id]
-            agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, t)
+        if dto.is_concurrent:
+            proc_list = []
+            queue = SimpleQueue()
+
+            for ag in agents:
+                proc_list.append(AgentProcess(cf, ag, t, queue))
+            for thr in proc_list:
+                thr.start()
+            for thr in proc_list:
+                thr.join()
+
+            output_list = [(0,0) for _ in range(N+B)]
+            while not queue.empty():
+                ag = queue.get()
+                output_list[ag.id] = ag.goal_point
+            queue.close()
+            for agent in agents:
+                agent.goal_point = output_list[agent.id]
+
+        else:
+            for agent in agents:
+                other_agents = [a for a in agents if a.id != agent.id]
+                agent.goal_point = cf.find_goal_point_for_agent(agent, other_agents, t)
 
         # every t the agents are moved in the direction of the goal point calculated by the control function
         # and the exploration matrix is updated
