@@ -31,7 +31,7 @@ class Control_function:
         self.type_of_search = dto.type_of_search
         self.type_of_coverage = dto.type_of_coverage
         self.type_of_exploration = dto.type_of_exploration
-        self.type_of_expl_weight = dto.type_of_expl_weight
+        self.expl_weight = dto.expl_weight
         self.concurrent_mode = dto.is_concurrent
 
         # Matrix that correlates each cell with the likelihood of a user in that area
@@ -311,18 +311,17 @@ class Control_function:
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            reward_under_test = new_coverage_level + self.exploration_factor(self.type_of_expl_weight,
-                                                                             t) * new_expl_level
+            reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
-                        agent.get_2D_position(), best_point)):
+                                                    agent.get_2D_position(), best_point)):
                 best_reward = reward_under_test
                 best_point = point
 
         return best_point
 
     # ==================================================================================================================
-    # Methods for exploration level
+    # Methods for exploration
     # ==================================================================================================================
 
     @staticmethod
@@ -475,16 +474,19 @@ class Control_function:
 
         return exploration_level
 
-    @staticmethod
     # return the weight of exploration in cost function
-    def exploration_factor(type_of_factor, t):
+    def exploration_weight(self, type_of_weight):
         # constant weight
-        if type_of_factor == "constant":
-            return EXPLORATION_FACTOR
+        if type_of_weight == "constant":
+            return EXPLORATION_NAME
 
-        # weight that decrease linear in time
-        elif type_of_factor == "linear":
-            return 1 - t / NUM_OF_ITERATIONS
+        # weight that decrease based on the number of covered users
+        elif type_of_weight == "decrescent":
+            num_user_covered = 0
+            for cov in self.__user_coverage_list:
+                if cov:
+                    num_user_covered += 1
+            return 1 if num_user_covered <= 1 else 1/num_user_covered
 
         else:
             raise Exception("Invalid type_of_expl_weight")
