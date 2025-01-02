@@ -1,6 +1,5 @@
 import os
 import pickle
-from tabnanny import process_tokens
 
 from Plots import plot_area, plot_coverage, plot_exploration
 from Control_function import Control_function
@@ -14,7 +13,7 @@ from Control_function_config_DTO import Control_function_DTO as DTO
 from AgentProcess import AgentProcess
 from multiprocessing import SimpleQueue
 
-def simulate(type_of_search, num_of_iter, deserialize):
+def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     # -----------------------------------------------
     #     1° step: simulation's environment creation
     # -----------------------------------------------
@@ -48,7 +47,7 @@ def simulate(type_of_search, num_of_iter, deserialize):
     dto = DTO(type_of_search=type_of_search,
               type_of_coverage="interference",
               type_of_exploration="interference",
-              type_of_expl_weight="constant",
+              expl_weight=expl_weight,
               is_concurrent=True)
     cf = Control_function(area, base_stations, agents, users, dto)
 
@@ -132,16 +131,16 @@ def simulate(type_of_search, num_of_iter, deserialize):
 
     # saving results with pickle files
     print("Saving simulation data...")
-    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}'), exist_ok=True)
     # noinspection PyTypeChecker
-    pickle.dump(time_elapsed, open(f"Plots/{type_of_search} search/{num_of_iter}/time_elapsed.p", "wb"))
+    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/time_elapsed.p", "wb"))
     # noinspection PyTypeChecker
-    pickle.dump(coverage_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/rewards.p', 'wb'))
+    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/coverages.p', 'wb'))
     # noinspection PyTypeChecker
-    pickle.dump(exploration_levels, open(f'Plots/{type_of_search} search/{num_of_iter}/exploration_level.p', 'wb'))
+    pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/exploration_levels.p', 'wb'))
 
     # plotting results
     print("Plotting results...")
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history)
-    plot_coverage(coverage_levels, time_elapsed, type_of_search, num_of_iter)
-    plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter)
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight)
+    plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
+    plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)

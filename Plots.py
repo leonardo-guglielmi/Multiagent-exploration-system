@@ -11,7 +11,7 @@ patch_grid = [[]]
 
 
 # todo: start using ax. instead of plt. for function calling
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, show_plot=False):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, show_plot=False):
     # define plot properties
     fig, ax = plt.subplots()
     plt.axis('square')
@@ -93,14 +93,14 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
         # used for the final coverage image
         if i == 0:
-            plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/initial coverage.png')
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/initial coverage.png')
 
         if i == len(trajectories[0]) - 1:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
-            plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/final coverage.png')
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/final coverage.png')
 
         return lines
 
@@ -132,46 +132,46 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             xa, ya = trajectory[i]
             agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
-        os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/'), exist_ok=True)
-        plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/animation frames/frame_{i}.png')
+        os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation frames/'), exist_ok=True)
+        plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation frames/frame_{i}.png')
 
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
     os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    ani.save(f'Plots/{type_of_search} search/{num_of_iter}/animation.mp4', writer='ffmpeg')
+    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
     ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]),
                                        interval=200,
                                        blit=True)
-    ani_prob.save(f'Plots/{type_of_search} search/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
+    ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, num_of_iter, show_plot=False):
+def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
     plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_exploration(exploration_levels, time_elapsed, type_of_search, num_of_iter, show_plot=False):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, show_plot=False):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
     plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    plt.savefig(f'Plots/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -184,7 +184,7 @@ def plot_coverages_comparison(coverages, show_plot=False):
     plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
-    plt.savefig(f'Plots/coverages_graphic_comparison.png')
+    plt.savefig(f'Simulations output/coverages_graphic_comparison.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -196,7 +196,23 @@ def plot_exploration_comparison(expl_levels, show_plot=False):
     plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
-    plt.savefig(f'Plots/exploration_graphic_comparison.png')
+    plt.savefig(f'Simulations output/exploration_graphic_comparison.png')
+    if show_plot:
+        plt.show()
+    plt.close()
+
+# todo: to finish this
+def plot_scatter_regression(final_expl, avg_der, show_plot=False):
+    plt.subplots()
+    plt.xlabel("final exploration")
+    plt.ylabel("average derivation")
+
+    types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
+                            "annealing reverse search": 3, "penalty search": 4}
+    color = ["red", "blue", "green", "orange", "purple"]
+    for search_type, search_type_index, color in zip(types_of_search_dict.keys(), types_of_search_dict.items(),  color):
+        plt.scatter(final_expl[search_type_index], avg_der[search_type_index], color=color)
+    plt.savefig(f'Simulations output/regression_scatter.png')
     if show_plot:
         plt.show()
     plt.close()

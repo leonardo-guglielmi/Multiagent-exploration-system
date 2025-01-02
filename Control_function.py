@@ -449,18 +449,7 @@ class Control_function:
                                     SINR_matrix[k + sup_y - inf_y][j] = 1
                                     already_checked_cells.append(k + sup_y - inf_y)
                                 break
-
                 # using some values to be safe: SINR=0, the cells doesn't contribute to exploration, SINR=1 the cells contribute
-            to_print = False
-            if to_print:
-                print("==========================================================")
-                print(f"number of relevant agents {len(relevant_agents)}")
-                print(f"number of cells {len(cells)}")
-                print(f"sinr matrix dimension corresponds? {SINR_matrix.shape}")
-                k = 0
-                for cell in SINR_matrix:
-                    print(f"{k}) {cell}")
-                    k += 1
 
             max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
 
@@ -478,7 +467,7 @@ class Control_function:
     def exploration_weight(self, type_of_weight):
         # constant weight
         if type_of_weight == "constant":
-            return EXPLORATION_NAME
+            return EXPLORATION_WEIGHT
 
         # weight that decrease based on the number of covered users
         elif type_of_weight == "decrescent":
@@ -489,7 +478,7 @@ class Control_function:
             return 1 if num_user_covered <= 1 else 1/num_user_covered
 
         else:
-            raise Exception("Invalid type_of_expl_weight")
+            raise Exception("Invalid expl_weight")
 
     def __update_prob_matrix(self, matrix):
         for i in range(matrix.shape[0]):
