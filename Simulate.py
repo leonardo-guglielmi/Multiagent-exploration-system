@@ -131,7 +131,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
 
     # saving results with pickle files
     print("Saving simulation data...")
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}'), exist_ok=True)
+    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}'), exist_ok=True)
     # noinspection PyTypeChecker
     pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/time_elapsed.p", "wb"))
     # noinspection PyTypeChecker

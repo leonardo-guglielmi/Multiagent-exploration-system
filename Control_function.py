@@ -262,7 +262,6 @@ class Control_function:
         best_point = None
         best_reward = -1
 
-        # todo: put all interference pre-computation inside RCR function (all of them)
         if self.type_of_coverage == "interference":
             # store powers of the actual interference
             partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
@@ -456,7 +455,8 @@ class Control_function:
             for k in range(len(max_SINR_per_cell)):
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
                     exploration_level += cells[k][1]
-            exploration_level /= len(cells)
+            exploration_level /= len(cells) #todo: check this, it could be too low
+            print(f"expl frontier evaluation {exploration_level}")
 
         else:
             raise Exception("Invalid type_of_exploration")

@@ -19,7 +19,7 @@ def main():
             deserialize = False
             for type_of_search in types_of_search:
                 for expl_weight in expl_weights:
-                    print(f'----- Starting simulation ["{type_of_search}"-"{expl_weight}"] : {i} -----')
+                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} -----')
                     simulate(type_of_search, expl_weight, i, deserialize)
                     Sensor.id = 0
                     User.id = 0
@@ -30,18 +30,17 @@ def main():
         types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
                                 "annealing reverse search": 3, "penalty search": 4}
 
-        # todo: add some stuff here
-
         # load results into arrays
         coverages = [[] for _ in range(len(types_of_search))]
         times = [[] for _ in range(len(types_of_search))]
         exploration_levels = [[] for _ in range(len(types_of_search))]
-        for type_of_search, type_value, expl_weight in zip(types_of_search_dict.items(), expl_weights):
-            for j in range(NUM_OF_SIMULATIONS):
-                # 3D matrix, for each type of search, for each simulation load coverage history of that simulation
-                coverages[type_value].append(pickle.load(open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{j}/rewards.p", "rb")))
-                times[type_value].append(pickle.load(open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{j}/time_elapsed.p", "rb")))
-                exploration_levels[type_value].append(pickle.load(open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{j}/exploration_level.p", "rb")))
+        for type_of_search, type_value in types_of_search_dict.items():
+            for expl_weight in expl_weights:
+                for j in range(NUM_OF_SIMULATIONS):
+                    # 3D matrix, for each type of search, for each simulation load coverage history of that simulation
+                    coverages[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/coverages.p", "rb")))
+                    times[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/time_elapsed.p", "rb")))
+                    exploration_levels[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/exploration_levels.p", "rb")))
 
         times_avg = [statistics.mean(time) for time in times]
         # ------
@@ -103,46 +102,47 @@ def main():
                 average_expl_levels[i][k] /= NUM_OF_SIMULATIONS
 
         # QUESTI LI STO SPERIMENTANDO
-        avg_der = [[] for _ in range(len(types_of_search))]
-        for i in range(len(exploration_levels)):
-            for j in range(len(exploration_levels[i])):
-                simu_expl_lvl = exploration_levels[i][j]
-                der = []
-                for k in range(1, len(simu_expl_lvl)):
-                    der.append(simu_expl_lvl[k]-simu_expl_lvl[k-1])
-                avg_der[i][j] = statistics.mean(der)
+        #avg_der = [[] for _ in range(len(types_of_search))]
+        #for i in range(len(exploration_levels)):
+            #for j in range(len(exploration_levels[i])):
+                #simu_expl_lvl = exploration_levels[i][j]
+                #der = []
+                #for k in range(1, len(simu_expl_lvl)):
+                    #der.append(simu_expl_lvl[k]-simu_expl_lvl[k-1])
+                #avg_der[i][j] = statistics.mean(der)
 
         # -----
         # storing results
         # -----
-        for type_of_search, expl_weight in zip(types_of_search_dict.keys(), expl_weights):
-            plot_coverage(average_coverages[types_of_search_dict[type_of_search]], 0,
+        for type_of_search in types_of_search_dict.keys():
+            for expl_weight in expl_weights:
+                plot_coverage(average_coverages[types_of_search_dict[type_of_search]], 0,
                           type_of_search.replace(" search", ""), expl_weight, "average")
 
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/average_time_elapsed.txt", "w") as f:
-                f.write(str(times_avg[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/average_time_elapsed.txt", "w") as f:
+                    f.write(str(times_avg[types_of_search_dict[type_of_search]]) + "\n")
 
-            with open(f"SSimulations output/{type_of_search} search/{expl_weight} weight/mean_coverage.txt", "w") as f:
-                f.write(str(mean_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/max_coverage.txt", "w") as f:
-                f.write(str(max_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/min_coverage.txt", "w") as f:
-                f.write(str(min_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/std_dev_coverage.txt", "w") as f:
-                f.write(str(std_devs_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/mean_coverage.txt", "w") as f:
+                    f.write(str(mean_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/max_coverage.txt", "w") as f:
+                    f.write(str(max_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/min_coverage.txt", "w") as f:
+                    f.write(str(min_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/std_dev_coverage.txt", "w") as f:
+                    f.write(str(std_devs_coverage[types_of_search_dict[type_of_search]]) + "\n")
 
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/mean_exploration.txt", "w") as f:
-                f.write(str(mean_final_expl[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/max_exploration.txt", "w") as f:
-                f.write(str(max_final_expl[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/min_exploration.txt", "w") as f:
-                f.write(str(min_final_expl[types_of_search_dict[type_of_search]]) + "\n")
-            with open(f"Simulations output/{type_of_search} search/{expl_weight} weight/std_dev_exploration.txt", "w") as f:
-                f.write(str(std_devs_expl[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/mean_exploration.txt", "w") as f:
+                    f.write(str(mean_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/max_exploration.txt", "w") as f:
+                    f.write(str(max_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/min_exploration.txt", "w") as f:
+                    f.write(str(min_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                with open(f"Simulations output/{type_of_search}/{expl_weight} weight/std_dev_exploration.txt", "w") as f:
+                    f.write(str(std_devs_expl[types_of_search_dict[type_of_search]]) + "\n")
 
         plot_coverages_comparison(average_coverages)
         plot_exploration_comparison(average_expl_levels)
-        plot_scatter_regression(final_expl_levels, avg_der)
+        #plot_scatter_regression(final_expl_levels, avg_der)
 
     except Exception as e:
         with open("error_log.txt", "w") as f:

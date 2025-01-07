@@ -158,6 +158,7 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
@@ -171,6 +172,7 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
     plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
@@ -210,7 +212,7 @@ def plot_scatter_regression(final_expl, avg_der, show_plot=False):
     types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
                             "annealing reverse search": 3, "penalty search": 4}
     color = ["red", "blue", "green", "orange", "purple"]
-    for search_type, search_type_index, color in zip(types_of_search_dict.keys(), types_of_search_dict.items(),  color):
+    for search_type, search_type_index, color in zip(types_of_search_dict.keys(), types_of_search_dict.values(),  color):
         plt.scatter(final_expl[search_type_index], avg_der[search_type_index], color=color)
     plt.savefig(f'Simulations output/regression_scatter.png')
     if show_plot:
