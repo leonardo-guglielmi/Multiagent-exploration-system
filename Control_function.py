@@ -258,6 +258,17 @@ class Control_function:
     # ==================================================================================================================
     # method that choose between the sampled points of an agent
     # ==================================================================================================================
+
+    # this function detects if the specified agent is coupled to another one
+    def agent_coupling_test(self, agent):
+        result = False
+        if len(agent.trajectory) > 2:
+            for other_agent in self.agents - agent:
+                if math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < MAX_DISPLACEMENT:
+                    result = True
+                    break
+        return result
+
     def find_goal_point_for_agent(self, agent, other_agents, t):
         best_point = None
         best_reward = -1
@@ -308,15 +319,18 @@ class Control_function:
                         break
 
             i += 1
-            agent.set_2D_position(original_position[0], original_position[1])
 
             reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
+            if self.agent_coupling_test(agent):
+                reward_under_test *= AGENTS_COUPLING_PENALTY
+
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
                                                     agent.get_2D_position(), best_point)):
                 best_reward = reward_under_test
                 best_point = point
 
+            agent.set_2D_position(original_position[0], original_position[1])
         return best_point
 
     # ==================================================================================================================
@@ -455,8 +469,8 @@ class Control_function:
             for k in range(len(max_SINR_per_cell)):
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
                     exploration_level += cells[k][1]
-            exploration_level /= len(cells) #todo: check this, it could be too low
-            print(f"expl frontier evaluation {exploration_level}")
+            exploration_level /= len(cells)
+            #print(f"expl frontier evaluation {exploration_level}")
 
         else:
             raise Exception("Invalid type_of_exploration")

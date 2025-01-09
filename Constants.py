@@ -11,6 +11,7 @@ MAX_DISPLACEMENT = 10  # max distance an agent can move from its actual position
 NUM_OF_ITERATIONS = 100  # max num of iterations before the algorithm stops (default: 100, test: 30)
 MIN_VERTICAL_DISTANCE = 0.15  # in meters
 SENSOR_HEIGHT = 0.15  # in meters
+AGENTS_COUPLING_PENALTY = 0.75
 
 M = 30  # number of users
 N = 10  # number of agents
@@ -37,3 +38,4 @@ USER_DISCONNECTION_PROBABILITY = 0.01  # (Pd in the model)
 USER_APPEARANCE_PROBABILITY = 0.1  # (Pb in the model)
 EXPLORATION_REGION_WIDTH = 20  # in meters (default: 20, test: 50)
 EXPLORATION_REGION_HEIGTH = 20  # in meters (default: 20, test: 50)
+
