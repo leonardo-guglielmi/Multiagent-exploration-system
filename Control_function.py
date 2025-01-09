@@ -263,8 +263,8 @@ class Control_function:
     def agent_coupling_test(self, agent):
         result = False
         if len(agent.trajectory) > 2:
-            for other_agent in self.agents - agent:
-                if math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < MAX_DISPLACEMENT:
+            for other_agent in self.agents:
+                if other_agent != agent and math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < MAX_DISPLACEMENT:
                     result = True
                     break
         return result
