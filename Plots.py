@@ -70,12 +70,12 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     def animate(i):
         # this two ifs are used to clear the plot from the precedent frame
         global user_scatter
-        for scatter in user_scatter:
+        for scatter in user_scatter[:]:
             scatter.remove()
             user_scatter.remove(scatter)
 
         global agent_scatter
-        for scatter in agent_scatter:
+        for scatter in agent_scatter[:]:
             scatter.remove()
             agent_scatter.remove(scatter)
 
@@ -138,7 +138,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
-    os.makedirs(os.path.dirname(f'Plots/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
     ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
     ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]),
@@ -155,7 +155,7 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
-    plt.ylabel(f'Coverage ({type_of_search})')
+    plt.ylabel(f'Coverage ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
@@ -169,7 +169,7 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
-    plt.ylabel(f'Exploration ({type_of_search})')
+    plt.ylabel(f'Exploration ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
     os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
@@ -179,7 +179,7 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.close()
 
 
-def plot_coverages_comparison(coverages, show_plot=False):
+def plot_coverages_comparison_by_search(coverages, show_plot=False):
     plt.subplots()
     for coverage in coverages:
         plt.plot(range(len(coverage)), coverage)
@@ -191,7 +191,7 @@ def plot_coverages_comparison(coverages, show_plot=False):
         plt.show()
     plt.close()
 
-def plot_exploration_comparison(expl_levels, show_plot=False):
+def plot_exploration_comparison_by_search(expl_levels, show_plot=False):
     plt.subplots()
     for expl in expl_levels:
         plt.plot(range(len(expl)), expl)
@@ -202,6 +202,10 @@ def plot_exploration_comparison(expl_levels, show_plot=False):
     if show_plot:
         plt.show()
     plt.close()
+
+
+
+
 
 # todo: to finish this
 def plot_scatter_regression(final_expl, avg_der, show_plot=False):
