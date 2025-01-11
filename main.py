@@ -1,6 +1,7 @@
 import pickle
 import statistics
-from Plots import plot_coverage, plot_coverages_comparison, plot_exploration_comparison, plot_scatter_regression
+
+from Plots import *
 from datetime import datetime as date
 
 from Simulate import simulate
@@ -29,120 +30,133 @@ def main():
         # this dictionary is used to convert types of search into numbers for indexing
         types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
                                 "annealing reverse search": 3, "penalty search": 4}
+        expl_weights_dict = {"constant": 0, "decrescent": 1}
 
-        # load results into arrays
-        coverages = [[] for _ in range(len(types_of_search))]
-        times = [[] for _ in range(len(types_of_search))]
-        exploration_levels = [[] for _ in range(len(types_of_search))]
-        for type_of_search, type_value in types_of_search_dict.items():
-            for expl_weight in expl_weights:
+        # load results into 4D matrix, for each type of search, for each exploration weight, for each simulation load coverage history of that simulation
+        coverages: list[list[list[list[float]]]] = [[[] for _ in range(len(expl_weights))] for _ in range(len(types_of_search))]
+        times: list[list[list[list[float]]]] = [[[] for _ in range(len(expl_weights))] for _ in range(len(types_of_search))]
+        exploration_levels: list[list[list[list[float]]]] = [[[] for _ in range(len(expl_weights))] for _ in range(len(types_of_search))]
+
+        for type_of_search, search_index in types_of_search_dict.items():
+            for expl_weight, weight_index in expl_weights_dict.items():
                 for j in range(NUM_OF_SIMULATIONS):
-                    # 3D matrix, for each type of search, for each simulation load coverage history of that simulation
-                    coverages[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/coverages.p", "rb")))
-                    times[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/time_elapsed.p", "rb")))
-                    exploration_levels[type_value].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/exploration_levels.p", "rb")))
+                    coverages[search_index][weight_index].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/coverages.p", "rb")))
+                    times[search_index][weight_index].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/time_elapsed.p", "rb")))
+                    exploration_levels[search_index][weight_index].append(pickle.load(open(f"Simulations output/{type_of_search}/{expl_weight} weight/{j}/exploration_levels.p", "rb")))
 
-        times_avg = [statistics.mean(time) for time in times]
-        # ------
+        # 2D matrix sorted by [type_of_search][expl_weight]
+        times_avg = [[statistics.mean(time) for time in times_by_search] for times_by_search in times]
+
+        # --------------------------------------------------------------------------------------------------------------
         # statistic indices for coverage
-        # ------
+        # --------------------------------------------------------------------------------------------------------------
 
-        # extract final coverages of each simulation
-        final_coverages = [[0 for _ in range(len(coverages[0]))] for _ in range(len(coverages))]
+        final_coverages = [[[0 for _ in range(len(coverages[0][0]))] for _ in range(len(coverages[0]))] for _ in range(len(coverages))]
         for i in range(len(coverages)):
             for j in range(len(coverages[i])):
-                final_coverages[i][j] = coverages[i][j][-1]  # get only the final coverage at the end of the simulation
+                for k in range(len(coverages[i][j])):
+                    final_coverages[i][j][k] = coverages[i][j][k][-1]  # get only the final coverage at the end of the simulation
 
-        mean_final_coverage = [statistics.mean(final_reward) for final_reward in final_coverages]
-        max_final_coverage = [max(final_reward) for final_reward in final_coverages]
-        min_final_coverage = [min(final_reward) for final_reward in final_coverages]
-        std_devs_coverage = [statistics.stdev(final_reward) for final_reward in final_coverages]
+        mean_final_coverages = [[statistics.mean(final_cov_by_weight) for final_cov_by_weight in final_cov_by_search] for final_cov_by_search in final_coverages]
+        max_final_coverages = [[max(final_cov_by_weight) for final_cov_by_weight in final_cov_by_search] for final_cov_by_search in final_coverages]
+        min_final_coverages = [[min(final_cov_by_weight) for final_cov_by_weight in final_cov_by_search] for final_cov_by_search in final_coverages]
+        std_devs_coverages = [[statistics.stdev(final_cov_by_weight) for final_cov_by_weight in final_cov_by_search] for final_cov_by_search in final_coverages]
 
         # if the simulation stopped earlier, add elements to adapt list length
-        for i in range(len(types_of_search)):
-            for j in range(NUM_OF_SIMULATIONS):
-                if len(coverages[i][j]) < NUM_OF_ITERATIONS + 1:
-                    for k in range(NUM_OF_ITERATIONS + 1 - len(coverages[i][j])):
-                        coverages[i][j].append(1.0)
+        for i in range(len(types_of_search)):   # iter through searches
+            for j in range(len(expl_weights)):      # iter through weights
+                for k in range(NUM_OF_SIMULATIONS):     # iter through simulations
+                    if len(coverages[i][j][k]) < NUM_OF_ITERATIONS + 1:
+                        for _ in range(NUM_OF_ITERATIONS + 1 - len(coverages[i][j])):
+                            coverages[i][j][k].append(1)
 
         # for each type_of_search, get the average coverage of all simulations for specific time
-        average_coverages = [[0 for _ in range(NUM_OF_ITERATIONS + 1)] for _ in range(len(types_of_search))]
+        average_coverages = [[[0 for _ in range(NUM_OF_ITERATIONS + 1)] for _ in range(len(expl_weights))] for _ in range(len(types_of_search))]
         for i in range(len(types_of_search)):
-            for k in range(NUM_OF_ITERATIONS + 1):
-                for j in range(NUM_OF_SIMULATIONS):
-                    average_coverages[i][k] += coverages[i][j][k]
-                average_coverages[i][k] /= NUM_OF_SIMULATIONS
+            for j in range(len(expl_weights)):
+                for k in range(NUM_OF_ITERATIONS + 1):
+                    for l in range(NUM_OF_SIMULATIONS):
+                        average_coverages[i][j][k] += coverages[i][j][l][k]
+                    average_coverages[i][j][k] /= NUM_OF_SIMULATIONS
 
-        # ------
+        # --------------------------------------------------------------------------------------------------------------
         # statistic indices for exploration
-        # ------
-        final_expl_levels = [[0 for _ in range(len(exploration_levels[0]))] for _ in range(len(exploration_levels))]
+        # --------------------------------------------------------------------------------------------------------------
+        final_expl_levels: list[list[list[int]]] = [[[0 for _ in range(len(exploration_levels[0][0]))] for _ in range(len(exploration_levels[0]))] for _ in range(len(exploration_levels))]
         for i in range(len(exploration_levels)):
             for j in range(len(exploration_levels[i])):
-                final_expl_levels[i][j] = exploration_levels[i][j][-1]  # get only the final coverage at the end of the simulation
+                for k in range(len(exploration_levels[i][j])):
+                    final_expl_levels[i][j][k] = exploration_levels[i][j][k][-1]  # get only the final coverage at the end of the simulation
 
-        mean_final_expl = [statistics.mean(final_expl) for final_expl in final_expl_levels]
-        max_final_expl = [max(final_expl) for final_expl in final_expl_levels]
-        min_final_expl = [min(final_expl) for final_expl in final_expl_levels]
-        std_devs_expl = [statistics.stdev(final_expl) for final_expl in final_expl_levels]
+        mean_final_expls = [[statistics.mean(final_expl_by_weight) for final_expl_by_weight in final_expl_by_search] for final_expl_by_search in final_expl_levels]
+        max_final_expls = [[max(final_expl_by_weight) for final_expl_by_weight in final_expl_by_search] for final_expl_by_search in final_expl_levels]
+        min_final_expls = [[min(final_expl_by_weight) for final_expl_by_weight in final_expl_by_search] for final_expl_by_search in final_expl_levels]
+        std_devs_expls = [[statistics.stdev(final_expl_by_weight) for final_expl_by_weight in final_expl_by_search] for final_expl_by_search in final_expl_levels]
 
         # if the simulation stopped earlier, add elements to adapt list length
-        for i in range(len(types_of_search)):
-            for j in range(NUM_OF_SIMULATIONS):
-                if len(exploration_levels[i][j]) < NUM_OF_ITERATIONS + 1:
-                    for k in range(NUM_OF_ITERATIONS + 1 - len(exploration_levels[i][j])):
-                        exploration_levels[i][j].append(1.0)
+        for i in range(len(types_of_search)):  # iter through searches
+            for j in range(len(expl_weights)):  # iter through weights
+                for k in range(NUM_OF_SIMULATIONS):  # iter through simulations
+                    if len(exploration_levels[i][j][k]) < NUM_OF_ITERATIONS + 1:
+                        for _ in range(NUM_OF_ITERATIONS + 1 - len(coverages[i][j])):
+                            exploration_levels[i][j][k].append(1)
 
         # for each type_of_search, get the average coverage of all simulations for specific time
-        average_expl_levels = [[0 for _ in range(NUM_OF_ITERATIONS + 1)] for _ in range(len(types_of_search))]
+        average_expl_levels = [[[0 for _ in range(NUM_OF_ITERATIONS + 1)]
+                                for _ in range(len(expl_weights))]
+                               for _ in range(len(types_of_search))]
         for i in range(len(types_of_search)):
-            for k in range(NUM_OF_ITERATIONS + 1):
-                for j in range(NUM_OF_SIMULATIONS):
-                    average_expl_levels[i][k] += exploration_levels[i][j][k]
-                average_expl_levels[i][k] /= NUM_OF_SIMULATIONS
+            for j in range(len(expl_weights)):
+                for k in range(NUM_OF_ITERATIONS + 1):
+                    for l in range(NUM_OF_SIMULATIONS):
+                        average_expl_levels[i][j][k] += exploration_levels[i][j][l][k]
+                    average_expl_levels[i][j][k] /= NUM_OF_SIMULATIONS
 
-        # QUESTI LI STO SPERIMENTANDO
-        #avg_der = [[] for _ in range(len(types_of_search))]
-        #for i in range(len(exploration_levels)):
-            #for j in range(len(exploration_levels[i])):
-                #simu_expl_lvl = exploration_levels[i][j]
-                #der = []
-                #for k in range(1, len(simu_expl_lvl)):
-                    #der.append(simu_expl_lvl[k]-simu_expl_lvl[k-1])
-                #avg_der[i][j] = statistics.mean(der)
 
-        # -----
+
+        # --------------------------------------------------------------------------------------------------------------
         # storing results
-        # -----
-        for type_of_search in types_of_search_dict.keys():
-            for expl_weight in expl_weights:
-                plot_coverage(average_coverages[types_of_search_dict[type_of_search]], 0,
-                          type_of_search.replace(" search", ""), expl_weight, "average")
+        # --------------------------------------------------------------------------------------------------------------
+
+        # store statistic indices for each type of search, for each exploration weight
+        for type_of_search, search_index in types_of_search_dict.items():
+
+            plot_coverage_weight_coverage_comparison([average_coverages[search_index][expl_weights_dict["constant"]]
+                                                     , average_coverages[search_index][expl_weights_dict["decrescent"]]]
+                                                     , type_of_search)
+            plot_exploration_weight_coverage_comparison([average_expl_levels[search_index][expl_weights_dict["constant"]]
+                                                     , average_expl_levels[search_index][expl_weights_dict["decrescent"]]]
+                                                     , type_of_search)
+
+            for expl_weight, weight_index in expl_weights_dict.items():
+                plot_coverage(average_coverages[search_index][weight_index], 0, type_of_search.replace(" search", ""), expl_weight, "average")
+                plot_exploration(average_expl_levels[search_index][weight_index], 0, type_of_search.replace(" search", ""), expl_weight, "average")
 
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/average_time_elapsed.txt", "w") as f:
-                    f.write(str(times_avg[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(times_avg[search_index][weight_index]) + "\n")
 
+                # todo: continua a fare questa modifica dell'indice dopo, ma il filone è questo
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/mean_coverage.txt", "w") as f:
-                    f.write(str(mean_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(mean_final_coverages[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/max_coverage.txt", "w") as f:
-                    f.write(str(max_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(max_final_coverages[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/min_coverage.txt", "w") as f:
-                    f.write(str(min_final_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(min_final_coverages[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/std_dev_coverage.txt", "w") as f:
-                    f.write(str(std_devs_coverage[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(std_devs_coverages[search_index][weight_index]) + "\n")
 
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/mean_exploration.txt", "w") as f:
-                    f.write(str(mean_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(mean_final_expls[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/max_exploration.txt", "w") as f:
-                    f.write(str(max_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(max_final_expls[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/min_exploration.txt", "w") as f:
-                    f.write(str(min_final_expl[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(min_final_expls[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/std_dev_exploration.txt", "w") as f:
-                    f.write(str(std_devs_expl[types_of_search_dict[type_of_search]]) + "\n")
+                    f.write(str(std_devs_expls[search_index][weight_index]) + "\n")
 
         plot_coverages_comparison(average_coverages)
         plot_exploration_comparison(average_expl_levels)
-        #plot_scatter_regression(final_expl_levels, avg_der)
+        # plot_scatter_regression(final_expl_levels, avg_der)
 
     except Exception as e:
         with open("error_log.txt", "w") as f:

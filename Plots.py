@@ -179,11 +179,17 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.close()
 
 
-def plot_coverages_comparison_by_search(coverages, show_plot=False):
+def plot_coverages_comparison(coverages, show_plot=False):
     plt.subplots()
-    for coverage in coverages:
-        plt.plot(range(len(coverage)), coverage)
-    plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
+    for coverage_list in coverages:
+        for coverage in coverage_list:
+            plt.plot(range(len(coverage)), coverage)
+    plt.legend(["Systematic, constant", "Systematic, decrescent"
+                   , "Local, constant", "Local, decrescent"
+                   , "Annealing forward, constant", "Annealing forward, decrescent"
+                   , "Annealing reverse, constant", "Annealing reverse, decrescent"
+                   , "Penalty, constant", "Penalty, decrescent"]
+                   , bbox_to_anchor=(0.7, 1.3), loc='upper right')
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
     plt.savefig(f'Simulations output/coverages_graphic_comparison.png')
@@ -191,11 +197,17 @@ def plot_coverages_comparison_by_search(coverages, show_plot=False):
         plt.show()
     plt.close()
 
-def plot_exploration_comparison_by_search(expl_levels, show_plot=False):
+def plot_exploration_comparison(expl_levels, show_plot=False):
     plt.subplots()
-    for expl in expl_levels:
-        plt.plot(range(len(expl)), expl)
-    plt.legend(["Systematic", "Local", "Annealing forward", "Annealing reverse", "Penalty"])
+    for expl_list in expl_levels:
+        for expl in expl_list:
+            plt.plot(range(len(expl)), expl)
+    plt.legend(["Systematic, constant", "Systematic, decrescent"
+                   , "Local, constant", "Local, decrescent"
+                   , "Annealing forward, constant", "Annealing forward, decrescent"
+                   , "Annealing reverse, constant", "Annealing reverse, decrescent"
+                   , "Penalty, constant", "Penalty, decrescent"]
+                   , bbox_to_anchor = (0.7, 1.3), loc = 'upper right')
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
     plt.savefig(f'Simulations output/exploration_graphic_comparison.png')
@@ -203,8 +215,29 @@ def plot_exploration_comparison_by_search(expl_levels, show_plot=False):
         plt.show()
     plt.close()
 
+def plot_coverage_weight_coverage_comparison(coverages_avg, type_of_search, show_plot=False):
+    plt.subplots()
+    for cov_avg in coverages_avg:
+        plt.plot(range(len(cov_avg)), cov_avg)
+    plt.legend(["constant" , "decrescent"])
+    plt.xlabel('Iterations')
+    plt.ylabel(f'Coverage, {type_of_search} search')
+    plt.savefig(f"Simulations output/{type_of_search}/coverage_weight_comparison.png")
+    if show_plot:
+        plt.show()
+    plt.close()
 
-
+def plot_exploration_weight_coverage_comparison(explorations_avg, type_of_search, show_plot=False):
+    plt.subplots()
+    for expl_avg in explorations_avg:
+        plt.plot(range(len(expl_avg)), expl_avg)
+    plt.legend(["constant" , "decrescent"])
+    plt.xlabel('Iterations')
+    plt.ylabel(f'Exploration, {type_of_search}')
+    plt.savefig(f"Simulations output/{type_of_search}/exploration_weight_comparison.png")
+    if show_plot:
+        plt.show()
+    plt.close()
 
 
 # todo: to finish this
