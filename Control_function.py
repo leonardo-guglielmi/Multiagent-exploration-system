@@ -264,7 +264,8 @@ class Control_function:
         result = False
         if len(agent.trajectory) > 2:
             for other_agent in self.agents:
-                if other_agent != agent and math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < MAX_DISPLACEMENT:
+                if (other_agent != agent
+                        and math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < 2*MAX_DISPLACEMENT):
                     result = True
                     break
         return result
@@ -320,7 +321,7 @@ class Control_function:
 
             i += 1
 
-            reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
+            reward_under_test = new_coverage_level + (self.exploration_weight(self.expl_weight) * new_expl_level)*10 # todo: try to fix this
             if self.agent_coupling_test(agent):
                 reward_under_test *= AGENTS_COUPLING_PENALTY
 
@@ -489,7 +490,7 @@ class Control_function:
             for cov in self.__user_coverage_list:
                 if cov:
                     num_user_covered += 1
-            return 1 if num_user_covered <= 1 else 1/num_user_covered
+            return 1 if num_user_covered <= 1 else 2/num_user_covered
 
         else:
             raise Exception("Invalid expl_weight")
