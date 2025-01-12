@@ -135,7 +135,6 @@ def main():
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/average_time_elapsed.txt", "w") as f:
                     f.write(str(times_avg[search_index][weight_index]) + "\n")
 
-                # todo: continua a fare questa modifica dell'indice dopo, ma il filone è questo
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/mean_coverage.txt", "w") as f:
                     f.write(str(mean_final_coverages[search_index][weight_index]) + "\n")
                 with open(f"Simulations output/{type_of_search}/{expl_weight} weight/max_coverage.txt", "w") as f:
@@ -156,7 +155,12 @@ def main():
 
         plot_coverages_comparison(average_coverages)
         plot_exploration_comparison(average_expl_levels)
-        # plot_scatter_regression(final_expl_levels, avg_der)
+        plot_statistics_comparison("coverage", "max")
+        plot_statistics_comparison("coverage", "mean")
+        plot_statistics_comparison("coverage", "min")
+        plot_statistics_comparison("exploration", "max")
+        plot_statistics_comparison("exploration", "mean")
+        plot_statistics_comparison("exploration", "min")
 
     except Exception as e:
         with open("error_log.txt", "w") as f:

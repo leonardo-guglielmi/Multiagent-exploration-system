@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import animation
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -9,10 +10,10 @@ user_scatter = []
 agent_scatter = []
 patch_grid = [[]]
 
+# array of color used in comparison graphics
+colors = ['red', 'darkred', 'gold', 'darkorange', 'limegreen', 'darkgreen', 'cornflowerblue', 'mediumblue', 'mediumorchid', 'rebeccapurple']
 
-# todo: start using ax. instead of plt. for function calling
 def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, show_plot=False):
-    # define plot properties
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -37,12 +38,10 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
     plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
 
-    # todo: improve?
     trajectories = [agent.trajectory for agent in agents]
     lines = [ax.plot([], [], lw=0.7)[0] for _ in trajectories]
     # [0] allow to work directly with Line2D objects, not with list of lines
 
-    # todo: try to remove this and see what happen, I think it would be ok anyway
     def init():
         for line in lines:
             line.set_data([], [])
@@ -68,7 +67,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     def animate(i):
-        # this two ifs are used to clear the plot from the precedent frame
+        # this two ifs are used to clear the plot from the precedent frame (slicing avoid smudges in animation)
         global user_scatter
         for scatter in user_scatter[:]:
             scatter.remove()
@@ -181,36 +180,52 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
 
 def plot_coverages_comparison(coverages, show_plot=False):
     plt.subplots()
+    j = 0 # index to iter through colors
     for coverage_list in coverages:
         for coverage in coverage_list:
-            plt.plot(range(len(coverage)), coverage)
-    plt.legend(["Systematic, constant", "Systematic, decrescent"
-                   , "Local, constant", "Local, decrescent"
-                   , "Annealing forward, constant", "Annealing forward, decrescent"
-                   , "Annealing reverse, constant", "Annealing reverse, decrescent"
-                   , "Penalty, constant", "Penalty, decrescent"]
-                   , bbox_to_anchor=(0.7, 1.3), loc='upper right')
+            plt.plot(range(len(coverage)), coverage, color=colors[j])
+            j += 1
+    plt.legend(["Systematic search, constant weight"
+                   , "Systematic search, decrescent weight"
+                   , "Local search, constant weight"
+                   , "Local search, decrescent weight"
+                   , "Annealing forward search, constant weight"
+                   , "Annealing forward search, decrescent weight"
+                   , "Annealing reverse search, constant weight"
+                   , "Annealing reverse search, decrescent weight"
+                   , "Penalty search, constant weight"
+                   , "Penalty search, decrescent weight"]
+               , bbox_to_anchor=(1, 1)
+               , loc='upper left')
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
-    plt.savefig(f'Simulations output/coverages_graphic_comparison.png')
+    plt.savefig(f'Simulations output/coverages_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
 
 def plot_exploration_comparison(expl_levels, show_plot=False):
     plt.subplots()
+    j = 0 # index to iter through colors
     for expl_list in expl_levels:
         for expl in expl_list:
-            plt.plot(range(len(expl)), expl)
-    plt.legend(["Systematic, constant", "Systematic, decrescent"
-                   , "Local, constant", "Local, decrescent"
-                   , "Annealing forward, constant", "Annealing forward, decrescent"
-                   , "Annealing reverse, constant", "Annealing reverse, decrescent"
-                   , "Penalty, constant", "Penalty, decrescent"]
-                   , bbox_to_anchor = (0.7, 1.3), loc = 'upper right')
+            plt.plot(range(len(expl)), expl, color=colors[j])
+            j += 1
+    plt.legend(["Systematic search, constant weight"
+                   , "Systematic search, decrescent weight"
+                   , "Local search, constant weight"
+                   , "Local search, decrescent weight"
+                   , "Annealing forward search, constant weight"
+                   , "Annealing forward search, decrescent weight"
+                   , "Annealing reverse search, constant weight"
+                   , "Annealing reverse search, decrescent weight"
+                   , "Penalty search, constant weight"
+                   , "Penalty search, decrescent weight"]
+               , bbox_to_anchor=(1, 1)
+               , loc='upper left')
     plt.xlabel('Iterations')
-    plt.ylabel('Coverage')
-    plt.savefig(f'Simulations output/exploration_graphic_comparison.png')
+    plt.ylabel('Exploration')
+    plt.savefig(f'Simulations output/exploration_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
@@ -221,7 +236,7 @@ def plot_coverage_weight_coverage_comparison(coverages_avg, type_of_search, show
         plt.plot(range(len(cov_avg)), cov_avg)
     plt.legend(["constant" , "decrescent"])
     plt.xlabel('Iterations')
-    plt.ylabel(f'Coverage, {type_of_search} search')
+    plt.ylabel(f'Coverage, {type_of_search}')
     plt.savefig(f"Simulations output/{type_of_search}/coverage_weight_comparison.png")
     if show_plot:
         plt.show()
@@ -235,6 +250,49 @@ def plot_exploration_weight_coverage_comparison(explorations_avg, type_of_search
     plt.xlabel('Iterations')
     plt.ylabel(f'Exploration, {type_of_search}')
     plt.savefig(f"Simulations output/{type_of_search}/exploration_weight_comparison.png")
+    if show_plot:
+        plt.show()
+    plt.close()
+
+def plot_statistics_comparison(data_type, data_statistic, show_plot=False):
+    plt.subplots()
+
+    types_of_search = ["systematic", "local", "annealing forward", "annealing reverse", "penalty"]
+    expl_weights = ["constant", "decrescent"]
+
+    datas = []
+    data_deviations = []
+
+    for search in types_of_search:
+        for weight in expl_weights:
+            with open(f"Simulations output/{search} search/{weight} weight/{data_statistic}_{data_type}.txt", "r") as f:
+                datas.append(float(f.read()))
+                if data_statistic == "mean":
+                    with open(f"Simulations output/{search} search/{weight} weight/std_dev_{data_type}.txt", "r") as f:
+                        data_deviations.append(float(f.read()))
+    for i in range(len(datas)):
+        if data_statistic != "mean":
+            plt.bar(i, datas[i], width=0.8, color=colors[i])
+        else:
+            plt.bar(i, datas[i], width=0.8, color=colors[i], yerr=data_deviations[i])
+
+    plt.title(f"{data_statistic} {data_type} comparison")
+    plt.ylabel(f"{data_type}")
+    plt.legend(["Systematic search, constant weight"
+                , "Systematic search, decrescent weight"
+                , "Local search, constant weight"
+                , "Local search, decrescent weight"
+                , "Annealing forward search, constant weight"
+                , "Annealing forward search, decrescent weight"
+                , "Annealing reverse search, constant weight"
+                , "Annealing reverse search, decrescent weight"
+                , "Penalty search, constant weight"
+                , "Penalty search, decrescent weight"]
+                , bbox_to_anchor = (1, 1)
+                , loc = 'upper left')
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+
+    plt.savefig(f"Simulations output/{data_statistic}_{data_type}_comparison.png", bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
