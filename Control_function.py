@@ -322,7 +322,7 @@ class Control_function:
 
             i += 1
 
-            reward_under_test = new_coverage_level + (self.exploration_weight(self.expl_weight) * new_expl_level)*10 # todo: try to fix this
+            reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
             if self.agent_coupling_detection(agent):
                 reward_under_test *= AGENTS_COUPLING_PENALTY
 
