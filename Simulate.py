@@ -46,7 +46,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
 
     dto = DTO(type_of_search=type_of_search,
               type_of_coverage="interference",
-              type_of_exploration="interference",
+              type_of_exploration="PCI",
               expl_weight=expl_weight,
               is_concurrent=True)
     cf = Control_function(area, base_stations, agents, users, dto)

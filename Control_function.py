@@ -379,7 +379,7 @@ class Control_function:
                         break
 
             # this method takes into account interferences from other sensor to decide if a cell is explored or not
-            if self.type_of_exploration == "interference":
+            elif self.type_of_exploration == "PSI" or self.type_of_exploration == "PSINCC" or self.type_of_exploration == "PCI":
                 sensors_interference = [0 for _ in self.agents + self.base_stations]
                 for sensor in self.agents + self.base_stations:
                     sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point,
@@ -395,6 +395,9 @@ class Control_function:
                         result = True
                         break
 
+            else:
+                raise Exception("Invalid type_of_exploration")
+
         return result
 
     # used to elaborate exploration gain after agent's movement
@@ -409,7 +412,64 @@ class Control_function:
 
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "interference":
+        elif self.type_of_exploration == "PSI": # Proximity Square Interference
+
+            # control to not exceed area limits
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            if inf_x < 0:
+                inf_x = 0
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            if inf_y < 0:
+                inf_y = 0
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+
+            cells = []  # this list it will contain both coordinates and probability of a cell
+            for i in range(inf_x, sup_x):
+                for j in range(inf_y, sup_y):
+                    cells.append((self.get_cell_center(i, j) + (0,), self.__prob_matrix[i, j]))
+
+            # select only those agents that are sufficiently close to the agent I'm watching
+            relevant_agents = []
+            for sensor in self.agents + self.base_stations:
+                if (sensor != agent
+                        and math.dist(sensor.get_2D_position(),
+                                      agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
+                    relevant_agents.append(sensor)
+            relevant_agents.append(agent)
+
+            interference_powers = numpy.zeros((len(cells), len(relevant_agents)))
+
+            # excluding cells which have probability =0 (eg are covered) from exploration
+            for k in range(len(cells)):
+                if cells[k][1] != 0:
+                    for j in range(len(relevant_agents)):
+                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
+                                                                                           cells[k][0], relevant_agents)
+
+            SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
+            for k in range(len(cells)):
+                if cells[k][1] != 0:
+                        for j in range(len(relevant_agents)):
+                            SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
+                                                                                cells[k][0]) * relevant_agents[
+                                                      j].transmitting_power) /
+                                                 (interference_powers[k][j] + PSDN * BANDWIDTH))
+
+            max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
+
+            for k in range(len(max_SINR_per_cell)):
+                if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
+                    exploration_level += cells[k][1]
+            exploration_level /= len(cells)
+
+        # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
+        # uses only those cells to evaluate exploration gain
+        elif self.type_of_exploration == "PSINCC": # Proximity Square Interference, Neighbour Cell Check
 
             # control to not exceed area limits
             inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
@@ -472,8 +532,64 @@ class Control_function:
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
                     exploration_level += cells[k][1]
             exploration_level /= len(cells)
-            #print(f"expl frontier evaluation {exploration_level}")
 
+        # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
+        # uses only those cells to evaluate exploration gain
+        elif self.type_of_exploration == "PCI":  # Proximity Circle Interference
+
+            # control to not exceed area limits
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            if inf_x < 0:
+                inf_x = 0
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            if inf_y < 0:
+                inf_y = 0
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+
+            cells = []  # this list it will contain both coordinates and probability of a cell
+            for i in range(inf_x, sup_x):
+                for j in range(inf_y, sup_y):
+                    if math.dist(self.get_cell_center(i, j), agent.get_2D_position()) <= agent.communication_radius:
+                        cells.append((self.get_cell_center(i, j) + (0,), self.__prob_matrix[i, j]))
+
+            # select only those agents that are sufficiently close to the agent I'm watching
+            relevant_agents = []
+            for sensor in self.agents + self.base_stations:
+                if (sensor != agent
+                        and math.dist(sensor.get_2D_position(),
+                                      agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
+                    relevant_agents.append(sensor)
+            relevant_agents.append(agent)
+
+            interference_powers = numpy.zeros((len(cells), len(relevant_agents)))
+
+            # excluding cells which have probability =0 (eg are covered) from exploration
+            for k in range(len(cells)):
+                if cells[k][1] != 0:
+                    for j in range(len(relevant_agents)):
+                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
+                                                                                           cells[k][0], relevant_agents)
+
+            SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
+            for k in range(len(cells)):
+                if cells[k][1] != 0:
+                    for j in range(len(relevant_agents)):
+                        SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
+                                                                            cells[k][0]) * relevant_agents[
+                                                  j].transmitting_power) /
+                                             (interference_powers[k][j] + PSDN * BANDWIDTH))
+
+            max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
+
+            for k in range(len(max_SINR_per_cell)):
+                if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
+                    exploration_level += cells[k][1]
+            exploration_level /= len(cells)
         else:
             raise Exception("Invalid type_of_exploration")
 
