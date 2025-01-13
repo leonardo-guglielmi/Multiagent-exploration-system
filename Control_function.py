@@ -261,7 +261,7 @@ class Control_function:
     # ==================================================================================================================
 
     # this function detects if the specified agent is coupled to another one
-    def agent_coupling_test(self, agent):
+    def agent_coupling_detection(self, agent):
         result = False
         if len(agent.trajectory) > 2:
             for other_agent in self.agents:
@@ -323,7 +323,7 @@ class Control_function:
             i += 1
 
             reward_under_test = new_coverage_level + (self.exploration_weight(self.expl_weight) * new_expl_level)*10 # todo: try to fix this
-            if self.agent_coupling_test(agent):
+            if self.agent_coupling_detection(agent):
                 reward_under_test *= AGENTS_COUPLING_PENALTY
 
             if reward_under_test > best_reward or (reward_under_test == best_reward and
