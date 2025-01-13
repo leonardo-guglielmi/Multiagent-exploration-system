@@ -271,7 +271,7 @@ class Control_function:
                     break
         return result
 
-    def find_goal_point_for_agent(self, agent, other_agents, t):
+    def find_goal_point_for_agent(self, agent, other_agents, t, print_expl_eval=False):
         best_point = None
         best_reward = -1
 
@@ -283,6 +283,7 @@ class Control_function:
                 for sensor in [agent] + other_agents + self.base_stations:
                     partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
 
+        best_expl_evaluation = 0 # used for debug
         # iters through new sampled points and the actual position (it may don't move)
         i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, t):
@@ -331,8 +332,11 @@ class Control_function:
                                                     agent.get_2D_position(), best_point)):
                 best_reward = reward_under_test
                 best_point = point
+                best_expl_evaluation = new_expl_level
 
             agent.set_2D_position(original_position[0], original_position[1])
+        if print_expl_eval:
+            print(f"DEBUG: Agent {agent.id} best exploration evaluation {best_expl_evaluation}") # uncomment this for DEBUG
         return best_point
 
     # ==================================================================================================================
