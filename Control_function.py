@@ -3,7 +3,7 @@ import math
 import numpy
 from Constants import *
 import scipy
-from Sensor import Base_station
+from Sensor import Base_station, Agent
 from User import *
 
 
@@ -133,7 +133,8 @@ class Control_function:
         interference_pow = 0
         for other_sensor in other_sensors:
             if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also the target sensor when called
-                if isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs:
+                if  (isinstance(sensor, Agent) and isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs) \
+                        or (isinstance(sensor, Base_station) and isinstance(other_sensor, Agent) and not sensor.interference_by_bs):
                     continue
                 else:
                     interference_pow += self.channel_gain_by_position(other_sensor.get_3D_position(), point) * other_sensor.transmitting_power
@@ -381,6 +382,7 @@ class Control_function:
                                                                                              self.agents + self.base_stations)
                 sensors_SINR = [0 for _ in self.agents + self.base_stations]
 
+                # TODO se ho una BS come sensore, non ho interferenze in generale giusto? quindi in questo caso dovrei ignorare anche le interferenze degli agenti giusto?
                 for sensor in self.agents + self.base_stations:
                     sensors_SINR[sensor.id] = (self.channel_gain_by_position(sensor.get_3D_position(),
                                                                              point) * sensor.transmitting_power) / (
@@ -388,11 +390,6 @@ class Control_function:
                     if sensors_SINR[sensor.id] > DESIRED_COVERAGE_LEVEL:
                         result = True
                         break
-
-                # old code, it should be slower
-                # best_SINR = max(sensors_SINR)
-                # if best_SINR > DESIRED_COVERAGE_LEVEL:
-                #    result = True
 
         return result
 
