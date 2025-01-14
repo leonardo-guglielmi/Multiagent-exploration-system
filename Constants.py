@@ -38,4 +38,5 @@ USER_DISCONNECTION_PROBABILITY = 0.01  # (Pd in the model)
 USER_APPEARANCE_PROBABILITY = 0.1  # (Pb in the model)
 EXPLORATION_REGION_WIDTH = 20  # in meters (default: 20, test: 50)
 EXPLORATION_REGION_HEIGTH = 20  # in meters (default: 20, test: 50)
+NEIGHBOUR_SINR_THRESHOLD = 0.85
 
