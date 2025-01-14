@@ -514,7 +514,9 @@ class Control_function:
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
-                    if k not in already_checked_cells:
+                    if k in already_checked_cells:
+                        SINR_matrix[k][0] = 1
+                    else:
                         for j in range(len(relevant_agents)):
                             SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(), cells[k]["pos"]) * relevant_agents[j].transmitting_power) /
                                                          (interference_powers[k][j] + PSDN * BANDWIDTH))
@@ -522,10 +524,8 @@ class Control_function:
                             # if I get high SINR, mark also neighbor cells as relevant and exit from cycle
                             if SINR_matrix[k][j] >= 0.85:
                                 if (k+1) % (sup_y -inf_y) != 0 and cells[k+1] != 0:
-                                    SINR_matrix[k+1][j] = 1
                                     already_checked_cells.append(k + 1)
                                 if (k+1) <= (sup_x -inf_x -1)*(sup_y -inf_y) and cells[k + sup_y - inf_y] != 0:
-                                    SINR_matrix[k + sup_y - inf_y][j] = 1
                                     already_checked_cells.append(k + sup_y - inf_y)
                                 break
                 # using some values to be safe: SINR=0, the cells doesn't contribute to exploration, SINR=1 the cells contribute
@@ -595,6 +595,7 @@ class Control_function:
                     exploration_level += cells[k]["prob"]
             exploration_level /= len(cells)
 
+        # --------------------------------------------------------------------------------------------------------------
         elif self.type_of_exploration == "PCINCC":
 
             # control to not exceed area limits
@@ -629,46 +630,35 @@ class Control_function:
                     relevant_agents.append(sensor)
             relevant_agents.append(agent)
 
-            interference_powers = []
-            # excluding cells which have probability =0 (eg are covered) from exploration
+            interference_powers = [[[] for _ in range(len(cells[i]))] for i in range(len(cells))]
             for i in range(len(cells)):
-                interference_powers_column = []
                 for j in range(len(cells[i])):
-                    interference_powers_for_cell = []
                     if cells[i][j]["prob"] != 0:
                         for k in range(len(relevant_agents)):
-                            interference_powers_for_cell.append(self.__interference_powers_by_position(relevant_agents[k],cells[i][j]["pos"], relevant_agents))
-                    interference_powers_column.append(interference_powers_for_cell)
-                interference_powers.append(interference_powers_column)
+                            interference_powers[i][j].append(self.__interference_powers_by_position(relevant_agents[k],cells[i][j]["pos"], relevant_agents))
 
-            SINR_matrix = []
-
+            SINR_matrix = [[[] for _ in range(len(cells[i]))] for i in range(len(cells))]
             checked_cells = []
             for i in range(len(cells)):
-                SINR_matrix_column = []
                 for j in range(len(cells[i])):
-                    SINR_for_cell = []
-                    if cells[i][j]["pos"] in checked_cells:
-                        SINR_for_cell.append(1)
-                    else:
-                        if cells[i][j]["prob"] != 0:
+                    if cells[i][j]["prob"] != 0:
+                        if cells[i][j]["pos"] in checked_cells:
+                            SINR_matrix.append(1)
+                        else:
                             for k in range(len(relevant_agents)):
-                                SINR_tmp = (self.channel_gain_by_position(relevant_agents[k].get_3D_position(), cells[i][j]["pos"]) * relevant_agents[k].transmitting_power /
-                                                 (interference_powers[i][j][k] + PSDN * BANDWIDTH))
-                                SINR_for_cell.append(SINR_tmp)
+                                SINR = (self.channel_gain_by_position(relevant_agents[k].get_3D_position(), cells[i][j]["pos"]) * relevant_agents[k].transmitting_power /
+                                                     (interference_powers[i][j][k] + PSDN * BANDWIDTH))
+                                SINR_matrix[i][j].append(SINR)
 
-                                # if I get high SINR, mark also neighbor cells as relevant and exit from cycle
-                                if SINR_tmp >= 0.85:
-                                    if j+1 < len(cells[i]) and cells[i][j+1]["prob"] != 0: # check for upper cell
+                                if SINR >= NEIGHBOUR_SINR_THRESHOLD:
+                                    if j + 1 < len(cells[i]) and cells[i][j + 1]["prob"] != 0:  # check for upper cell
                                         checked_cells.append(cells[i][j]["pos"])
 
-                                    if i+1 < len(cells) and j < len(cells[i+1]) and cells[i+1][j]["prob"] != 0 and cells[i][j]["pos"] == tuple(map(sum, zip(cells[i+1][j]["pos"],(EXPLORATION_REGION_WIDTH, 0)))): # check for lateral
+                                    if i + 1 < len(cells) and j < len(cells[i + 1]) and cells[i + 1][j]["prob"] != 0 and cells[i][j]["pos"] == tuple(map(sum,zip(cells[i + 1][j]["pos"],(EXPLORATION_REGION_WIDTH,0)))):  # check for lateral
                                         checked_cells.append(cells[i][j]["pos"])
                                     break
-                    SINR_matrix_column.append(SINR_for_cell)
-                SINR_matrix.append(SINR_matrix_column)
-
             max_SINR_per_cell = [[max(SINR_matrix[i][j]) if len(SINR_matrix[i][j]) != 0 else 0 for j in range(len(cells[i]))] for i in range(len(cells))]
+
             for i in range(len(max_SINR_per_cell)):
                 for j in range(len(max_SINR_per_cell[i])):
                     if max_SINR_per_cell[i][j] > DESIRED_COVERAGE_LEVEL:
