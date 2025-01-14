@@ -416,7 +416,7 @@ class Control_function:
 
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "PSI": # Proximity Square Interference
+        elif self.type_of_exploration == "PSI": # PSI := Proximity Square Interference
 
             # control to not exceed area limits
             inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
@@ -435,7 +435,7 @@ class Control_function:
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
-                    cells.append((self.get_cell_center(i, j) + (0,), self.__prob_matrix[i, j]))
+                    cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
             # select only those agents that are sufficiently close to the agent I'm watching
             relevant_agents = []
@@ -450,17 +450,17 @@ class Control_function:
 
             # excluding cells which have probability =0 (eg are covered) from exploration
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
                         interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
-                                                                                           cells[k][0], relevant_agents)
+                                                                                           cells[k]["pos"], relevant_agents)
 
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                         for j in range(len(relevant_agents)):
                             SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
-                                                                                cells[k][0]) * relevant_agents[
+                                                                                cells[k]["pos"]) * relevant_agents[
                                                       j].transmitting_power) /
                                                  (interference_powers[k][j] + PSDN * BANDWIDTH))
 
@@ -468,7 +468,7 @@ class Control_function:
 
             for k in range(len(max_SINR_per_cell)):
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
-                    exploration_level += cells[k][1]
+                    exploration_level += cells[k]["prob"]
             exploration_level /= len(cells)
 
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
@@ -492,7 +492,7 @@ class Control_function:
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
-                    cells.append((self.get_cell_center(i, j) + (0,), self.__prob_matrix[i, j]))
+                    cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
             # select only those agents that are sufficiently close to the agent I'm watching
             relevant_agents = []
@@ -506,17 +506,17 @@ class Control_function:
 
             # excluding cells which have probability =0 (eg are covered) from exploration
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
-                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j], cells[k][0], relevant_agents)
+                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j], cells[k]["pos"], relevant_agents)
 
             already_checked_cells = []  # in this list I put those cells that have neighbor with high SINR
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                     if k not in already_checked_cells:
                         for j in range(len(relevant_agents)):
-                            SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(), cells[k][0]) * relevant_agents[j].transmitting_power) /
+                            SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(), cells[k]["pos"]) * relevant_agents[j].transmitting_power) /
                                                          (interference_powers[k][j] + PSDN * BANDWIDTH))
 
                             # if I get high SINR, mark also neighbor cells as relevant and exit from cycle
@@ -534,7 +534,7 @@ class Control_function:
 
             for k in range(len(max_SINR_per_cell)):
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
-                    exploration_level += cells[k][1]
+                    exploration_level += cells[k]["prob"]
             exploration_level /= len(cells)
 
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
@@ -559,7 +559,7 @@ class Control_function:
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
                     if math.dist(self.get_cell_center(i, j), agent.get_2D_position()) <= agent.communication_radius:
-                        cells.append((self.get_cell_center(i, j) + (0,), self.__prob_matrix[i, j]))
+                        cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
             # select only those agents that are sufficiently close to the agent I'm watching
             relevant_agents = []
@@ -574,17 +574,17 @@ class Control_function:
 
             # excluding cells which have probability =0 (eg are covered) from exploration
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
                         interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
-                                                                                           cells[k][0], relevant_agents)
+                                                                                           cells[k]["pos"], relevant_agents)
 
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
-                if cells[k][1] != 0:
+                if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
                         SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
-                                                                            cells[k][0]) * relevant_agents[
+                                                                            cells[k]["pos"]) * relevant_agents[
                                                   j].transmitting_power) /
                                              (interference_powers[k][j] + PSDN * BANDWIDTH))
 
@@ -592,7 +592,7 @@ class Control_function:
 
             for k in range(len(max_SINR_per_cell)):
                 if max_SINR_per_cell[k] > DESIRED_COVERAGE_LEVEL:
-                    exploration_level += cells[k][1]
+                    exploration_level += cells[k]["prob"]
             exploration_level /= len(cells)
 
         elif self.type_of_exploration == "PCINCC":
