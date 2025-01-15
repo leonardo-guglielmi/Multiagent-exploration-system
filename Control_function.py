@@ -122,7 +122,8 @@ class Control_function:
         interference_power = 0
         for other_sensor in other_agents + self.base_stations:
             if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also the target sensor when called
-                if isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs:
+                if (isinstance(sensor, Agent) and isinstance(other_sensor,Base_station) and not other_sensor.interference_by_bs) \
+                        or (isinstance(sensor, Base_station) and isinstance(other_sensor,Agent) and not sensor.interference_by_bs):
                     continue
                 else:
                     interference_power += self.channel_gain(other_sensor, user) * other_sensor.transmitting_power
@@ -133,7 +134,7 @@ class Control_function:
         interference_pow = 0
         for other_sensor in other_sensors:
             if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also the target sensor when called
-                if  (isinstance(sensor, Agent) and isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs) \
+                if (isinstance(sensor, Agent) and isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs) \
                         or (isinstance(sensor, Base_station) and isinstance(other_sensor, Agent) and not sensor.interference_by_bs):
                     continue
                 else:
