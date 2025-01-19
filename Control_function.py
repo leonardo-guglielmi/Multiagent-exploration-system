@@ -83,8 +83,10 @@ class Control_function:
     # Moves agents in their goal point
     def move_agents(self):
         for agent in self.agents:
-            delta_x = agent.goal_point[0] - agent.get_x()
-            delta_y = agent.goal_point[1] - agent.get_y()
+
+            coupling_deviation = self.agent_coupling_detection(agent)
+            delta_x = agent.goal_point[0] - agent.get_x() + coupling_deviation[0]
+            delta_y = agent.goal_point[1] - agent.get_y() + coupling_deviation[1]
             distance = math.dist(agent.goal_point, agent.get_2D_position())
 
             # if the displacement is too big, it is limited to MAX_DISPLACEMENT
@@ -263,14 +265,17 @@ class Control_function:
 
     # this function detects if the specified agent is coupled to another one
     def agent_coupling_detection(self, agent):
-        result = False
-        if len(agent.trajectory) > 2:
+        deviation = (0,0)
+        if len(agent.trajectory) > DECOUPLING_HISTORY_DEPTH:
             for other_agent in self.agents:
-                if (other_agent != agent
-                        and math.dist(agent.get_2D_position(), other_agent.get_2D_position()) < 2*MAX_DISPLACEMENT):
-                    result = True
-                    break
-        return result
+                if other_agent != agent:
+                    distance_history = [ ]
+                    for i in range(DECOUPLING_HISTORY_DEPTH):
+                        distance_history.append( math.dist(agent.trajectory[i], other_agent.trajectory[i]))
+                    if sum(distance_history) <= len(distance_history)*EXPLORATION_REGION_WIDTH*6:
+                        deviation = ( ( (agent.trajectory[0])[0] - (other_agent.trajectory[0])[0])
+                                     ,( (agent.trajectory[0])[1] - (other_agent.trajectory[0])[1]))
+        return deviation
 
     def find_goal_point_for_agent(self, agent, other_agents, t, print_expl_eval=False):
         best_point = None
@@ -325,8 +330,6 @@ class Control_function:
             i += 1
 
             reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
-            if self.agent_coupling_detection(agent):
-                reward_under_test *= AGENTS_COUPLING_PENALTY
 
             if reward_under_test > best_reward or (reward_under_test == best_reward and
                                                    math.dist(agent.get_2D_position(), point) > math.dist(
