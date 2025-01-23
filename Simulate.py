@@ -61,7 +61,11 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     prob_matrix_history.append(cf.get_prob_matrix_snapshot())
 
     print("Start coverage level: ", current_reward)
+    with open("output_log.txt", 'a') as f:
+        f.write(f"Start coverage level: {current_reward}\n")
     print("Start exploration level: ", current_expl)
+    with open("output_log.txt", 'a') as f:
+        f.write(f"Start exploration level: {current_expl}\n")
 
     # -----------------------------------------------
     #     3° step: simulation start
@@ -118,6 +122,11 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
 
         print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, " exploration_level: ",
               current_expl)
+        with open("output_log.txt", 'a') as f:
+            f.write(f"{type_of_search} iteration: {t} | coverage level: {current_reward} | exploration level: {current_expl}\n")
+
+        # UNCOMMENT THIS FOR DEBUG
+        # print(f"is sensor graph connected? {cf.get_agents_graph_connection()}")
 
     end = timer()
 

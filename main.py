@@ -16,16 +16,26 @@ def main():
         expl_weights = ["constant", "decrescent"]
 
         print(f"Simulations begin: {date.now()}\n")
+        with open("output_log.txt", 'w') as f:
+            f.write(f"Simulations begin: {date.now()}\n")
+
         for i in range(NUM_OF_SIMULATIONS):
             deserialize = False
             for type_of_search in types_of_search:
                 for expl_weight in expl_weights:
+
                     print(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} -----')
+                    with open("output_log.txt", 'a') as f:
+                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} -----\n')
+
                     simulate(type_of_search, expl_weight, i, deserialize)
                     Sensor.id = 0
                     User.id = 0
                     deserialize = True
         print("Simulations completed")
+        with open("output_log.txt", 'a') as f:
+            f.write("Simulations completed\n")
+
 
         # this dictionary is used to convert types of search into numbers for indexing
         types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
@@ -164,6 +174,8 @@ def main():
 
     except Exception as e:
         with open("error_log.txt", "w") as f:
+            f.write(str(e))
+        with open("output_log.txt", 'a') as f:
             f.write(str(e))
         raise e
 
