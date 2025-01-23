@@ -270,9 +270,9 @@ class Control_function:
                     distance_history = [ ]
                     for i in range(DECOUPLING_HISTORY_DEPTH):
                         distance_history.append( math.dist(agent.trajectory[i], other_agent.trajectory[i]))
-                    if sum(distance_history) <= len(distance_history)*EXPLORATION_REGION_WIDTH*6:
-                        deviation = ( ( (agent.trajectory[0])[0] - (other_agent.trajectory[0])[0])
-                                     ,( (agent.trajectory[0])[1] - (other_agent.trajectory[0])[1]))
+                    if sum(distance_history) <= len(distance_history)*EXPLORATION_REGION_WIDTH*2:
+                        deviation += ( ((agent.trajectory[0])[0] - (other_agent.trajectory[0])[0])
+                                     ,((agent.trajectory[0])[1] - (other_agent.trajectory[0])[1]))
         return deviation
 
     def find_goal_point_for_agent(self, agent, other_agents, t, print_expl_eval=False):
