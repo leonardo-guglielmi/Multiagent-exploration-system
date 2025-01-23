@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib import animation
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
@@ -55,7 +54,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         # first index is for x-axis, second index for y-axis
         matrix = prob_matrix_history[0]
         patch_grid = [[Rectangle((j * EXPLORATION_REGION_WIDTH, k * EXPLORATION_REGION_HEIGTH),
-                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, facecolor="#ff9900",
+                                 EXPLORATION_REGION_WIDTH, EXPLORATION_REGION_HEIGTH, color="#ff9900",
                                  alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
@@ -140,9 +139,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
     ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
-    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]),
-                                       interval=200,
-                                       blit=True)
+    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200, blit=True)
     ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
     if show_plot:
@@ -293,23 +290,6 @@ def plot_statistics_comparison(data_type, data_statistic, show_plot=False):
     plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
     plt.savefig(f"Simulations output/{data_statistic}_{data_type}_comparison.png", bbox_inches='tight')
-    if show_plot:
-        plt.show()
-    plt.close()
-
-
-# todo: to finish this
-def plot_scatter_regression(final_expl, avg_der, show_plot=False):
-    plt.subplots()
-    plt.xlabel("final exploration")
-    plt.ylabel("average derivation")
-
-    types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
-                            "annealing reverse search": 3, "penalty search": 4}
-    color = ["red", "blue", "green", "orange", "purple"]
-    for search_type, search_type_index, color in zip(types_of_search_dict.keys(), types_of_search_dict.values(),  color):
-        plt.scatter(final_expl[search_type_index], avg_der[search_type_index], color=color)
-    plt.savefig(f'Simulations output/regression_scatter.png')
     if show_plot:
         plt.show()
     plt.close()
