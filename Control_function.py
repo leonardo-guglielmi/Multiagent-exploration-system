@@ -97,6 +97,9 @@ class Control_function:
             agent.trajectory.append(agent.get_2D_position())
             self.__update_sensors_graph()
 
+    def get_agents_graph_connection(self):
+        return self.__is_connected_flag
+
     # ==================================================================================================================
     # methods for the signal analysis
     # ==================================================================================================================
