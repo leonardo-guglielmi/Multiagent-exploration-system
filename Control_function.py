@@ -57,12 +57,10 @@ class Control_function:
         graph = numpy.zeros((len(sensors), len(sensors)))
         for i in range(len(sensors)):
             for j in range(len(sensors)):
-                #
-                # question: non c'é una potenza/radice di troppo?
                 graph[i][j] = 1 if i != j and (
                         (sensors[i].get_x() - sensors[j].get_x()) ** 2 +
                         (sensors[i].get_y() - sensors[j].get_y()) ** 2 +
-                        (sensors[i].get_z() - sensors[j].get_z()) ** 2) ** 0.5 <= COMMUNICATION_RADIUS ** 2 \
+                        (sensors[i].get_z() - sensors[j].get_z()) ** 2) <= COMMUNICATION_RADIUS ** 2 \
                     else 0
         return graph
 
