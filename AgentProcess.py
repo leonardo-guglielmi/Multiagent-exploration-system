@@ -15,5 +15,5 @@ class AgentProcess(Process):
         self.output_queue = output_queue
 
     def run(self):
-        self.agent.goal_point = self.cf.find_goal_point_for_agent(self.agent, self.other_agents, self.t, print_expl_eval=True)
+        self.agent.goal_point = self.cf.find_goal_point_for_agent(self.agent, self.other_agents, self.t, print_expl_eval=False)
         self.output_queue.put(self.agent)
