@@ -16,7 +16,7 @@ def main():
         expl_weights = ["constant", "decrescent"]
 
         print(f"Simulations begin: {date.now()}\n")
-        with open("output_log.txt", 'w') as f:
+        with open("logs/output_log.txt", 'w') as f:
             f.write(f"Simulations begin: {date.now()}\n")
 
         for i in range(NUM_OF_SIMULATIONS):
@@ -25,7 +25,7 @@ def main():
                 for expl_weight in expl_weights:
 
                     print(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} -----')
-                    with open("output_log.txt", 'a') as f:
+                    with open("logs/output_log.txt", 'a') as f:
                         f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} -----\n')
 
                     simulate(type_of_search, expl_weight, i, deserialize)
@@ -33,7 +33,7 @@ def main():
                     User.id = 0
                     deserialize = True
         print("Simulations completed")
-        with open("output_log.txt", 'a') as f:
+        with open("logs/output_log.txt", 'a') as f:
             f.write("Simulations completed\n")
 
 
