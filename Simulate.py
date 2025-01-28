@@ -48,7 +48,8 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
               type_of_coverage="interference",
               type_of_exploration="PCINCC",
               expl_weight=expl_weight,
-              is_concurrent=True)
+              is_concurrent=True,
+              backhaul_network_available = True)
     cf = Control_function(area, base_stations, agents, users, dto)
 
     # starting points for coverage & exploration levels
