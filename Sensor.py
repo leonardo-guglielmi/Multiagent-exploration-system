@@ -11,9 +11,11 @@ class Sensor:
 
         # random placement, except for the altitude to prevent collision between agents
         self._x, self._y = random.uniform(0, area.width), random.uniform(0, area.length)
-        # if using something different from constant exploration factor, set spawn point for agents at base station
+
+        # set spawn point for agents at base station
         # spawn_point_list = [(1 / 4 * area.width, 1 / 4 * area.length), (1 / 4 * area.width, 3 / 4 * area.length), (3 / 4 * area.width, 1 / 4 * area.length), (3 / 4 * area.width, 3 / 4 * area.length)]
         # self._x, self._y = random.choice(spawn_point_list)
+
         self._z = altitude
 
         # assignment of other parameters
