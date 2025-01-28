@@ -6,7 +6,6 @@ import scipy
 from Sensor import Base_station, Agent
 from User import *
 
-# TODO rimuovi la coverage senza interferenze, mai usata e mai si userà, troppo semplice
 class Control_function:
     def __init__(self, area, base_stations, agents, users, dto):
         # initialization of all actors in the simulation
