@@ -392,7 +392,30 @@ class Control_function:
 
         return result
 
-    # used to elaborate exploration gain after agent's movement
+    @staticmethod
+    # Return the x,y bounds to select local exploration area cells (improves code clarity)
+    def __get_local_bounds(x, y):
+
+        inf_x = int((x - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
+        if inf_x < 0:
+            inf_x = 0
+
+        inf_y = int((y - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
+        if inf_y < 0:
+            inf_y = 0
+
+        sup_x = int((x + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
+        if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
+            sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
+
+        sup_y = int((y + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
+        if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
+            sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
+
+        return inf_x, inf_y, sup_x, sup_y
+
+
+    # Evaluate the exploration gain after agent's movement
     def __evaluate_new_exploration(self, agent):
         exploration_level = 0
 
@@ -408,20 +431,7 @@ class Control_function:
         # uses only those cells to evaluate exploration gain
         elif self.type_of_exploration == "PSI": # PSI := Proximity Square Interference
 
-            # control to not exceed area limits
-            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if inf_x < 0:
-                inf_x = 0
-            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if inf_y < 0:
-                inf_y = 0
-            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
-
+            inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
@@ -466,20 +476,7 @@ class Control_function:
         # uses only those cells to evaluate exploration gain
         elif self.type_of_exploration == "PSINCC": # Proximity Square Interference, Neighbour Cell Check
 
-            # control to not exceed area limits
-            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if inf_x < 0:
-                inf_x = 0
-            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if inf_y < 0:
-                inf_y = 0
-            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
-
+            inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
@@ -533,20 +530,7 @@ class Control_function:
         # uses only those cells to evaluate exploration gain
         elif self.type_of_exploration == "PCI":  # Proximity Circle Interference
 
-            # control to not exceed area limits
-            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if inf_x < 0:
-                inf_x = 0
-            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if inf_y < 0:
-                inf_y = 0
-            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
-
+            inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
@@ -590,20 +574,7 @@ class Control_function:
         # --------------------------------------------------------------------------------------------------------------
         elif self.type_of_exploration == "PCINCC":
 
-            # control to not exceed area limits
-            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if inf_x < 0:
-                inf_x = 0
-            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if inf_y < 0:
-                inf_y = 0
-            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
-
+            inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
             num_cells = 0
             for i in range(inf_x, sup_x):
