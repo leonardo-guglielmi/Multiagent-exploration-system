@@ -639,16 +639,25 @@ class Control_function:
                                     # check and mark upper cell
                                     if j + 1 < len(cells[i]) \
                                             and cells[i][j + 1]["prob"] != 0:  # check for upper cell
-                                        checked_cells.append(cells[i][j]["pos"])
-                                    # check and mark right cell
-                                    if i + 1 < len(cells) \
-                                            and j < len(cells[i + 1]) \
-                                            and cells[i + 1][j]["prob"] != 0 \
-                                            and cells[i][j]["pos"] == tuple(map(sum, zip(cells[i + 1][j]["pos"], (EXPLORATION_CELL_WIDTH, 0)))) \
-                                        :  # TODO FIX THIS
-                                        checked_cells.append(cells[i][j]["pos"])
-                                    break
-            max_SINR_per_cell = [[max(SINR_matrix[i][j]) if len(SINR_matrix[i][j]) != 0 else 0 for j in range(len(cells[i]))] for i in range(len(cells))]
+                                        checked_cells.append(cells[i][j+1]["pos"])
+
+                                    # first check to mark right cell
+                                    if i + 1 < len(cells):
+                                        # search if the right cell it's inside local area
+                                        for cell in cells[i+1]:
+                                            if cell["pos"] == self.__sum_triple( cells[i][j]["pos"],
+                                                                                (EXPLORATION_CELL_WIDTH, 0, 0)
+                                                ):
+                                                if cell["prob"] != 0:
+                                                    checked_cells.append(cell["pos"])
+                                                break # exit from right cell search
+                                    break # exit from agents cycle
+
+            max_SINR_per_cell = [ [ max(SINR_matrix[i][j]) if len(SINR_matrix[i][j]) != 0
+                                  else 0 for j in range(len(cells[i]))
+                                  ]
+                                for i in range(len(cells))
+                                ]
 
             for i in range(len(max_SINR_per_cell)):
                 for j in range(len(max_SINR_per_cell[i])):
@@ -700,3 +709,8 @@ class Control_function:
     # Returns a snapshot of prob_matrix
     def get_prob_matrix_snapshot(self):
         return copy.deepcopy(self.__prob_matrix)
+
+    @staticmethod
+    def __sum_triple(t1, t2):
+        return t1[0] + t2[0], t1[1] + t2[1], t1[2] + t2[2]
+
