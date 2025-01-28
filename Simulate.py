@@ -10,8 +10,8 @@ from Constants import *
 from timeit import default_timer as timer
 from Control_function_config_DTO import Control_function_DTO as DTO
 
-from AgentProcess import AgentProcess
-from multiprocessing import SimpleQueue
+from multiprocessing import Process
+from multiprocessing import Manager
 
 def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     # -----------------------------------------------
@@ -78,25 +78,18 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
 
         if dto.is_concurrent:
-            proc_list = []
-            queue = SimpleQueue()
-
-            for ag in agents:
-                proc_list.append(AgentProcess(cf, ag, t, queue))
-            for proc in proc_list:
-                proc.start()
-            for proc in proc_list:
-                proc.join()
-                proc.close()
-
-            output_list = [(0,0) for _ in range(N+B)]
-            while not queue.empty():
-                ag = queue.get()
-                output_list[ag.id] = ag.goal_point
-            queue.close()
-            for agent in agents:
-                agent.goal_point = output_list[agent.id]
-
+            with Manager() as manager:
+                shared_dict = manager.dict()
+                processes = [Process( target=concurrent_find_goal_point
+                                      , args=(cf, ag, t, shared_dict, ))
+                                    for ag in agents ]
+                for p in processes:
+                    p.start()
+                for p in processes:
+                    p.join()
+                    p.close()
+                for ag in agents:
+                    ag.goal_point = shared_dict[ag.id]
         else:
             for agent in agents:
                 other_agents = [a for a in agents if a.id != agent.id]
@@ -153,3 +146,11 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight)
     plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
     plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
+
+
+def concurrent_find_goal_point(cf, agent, t, output_dict):
+    other_agents = []
+    for ag in cf.agents:
+        if ag.id != agent.id:
+            other_agents.append(ag)
+    output_dict[agent.id] = cf.find_goal_point_for_agent(agent, other_agents, t, print_expl_eval=False)
