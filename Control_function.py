@@ -428,8 +428,8 @@ class Control_function:
 
         # --------------------------------------------------------------------------------------------------------------
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
-        # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "PSI": # PSI := Proximity Square Interference
+        # evaluate the exploration level only on those cells
+        elif self.type_of_exploration == "LSIE": # Local Square Interference Exploration
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
@@ -474,7 +474,7 @@ class Control_function:
         # --------------------------------------------------------------------------------------------------------------
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "PSINCC": # Proximity Square Interference, Neighbour Cell Check
+        elif self.type_of_exploration == "LSIENCC": # Local Square Interference Exploration, Neighbour Cell Check
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
@@ -528,7 +528,7 @@ class Control_function:
         # --------------------------------------------------------------------------------------------------------------
         # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
         # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "PCI":  # Proximity Circle Interference
+        elif self.type_of_exploration == "LCI":  # Local Circle Interference
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
@@ -572,7 +572,7 @@ class Control_function:
             exploration_level /= len(cells)
 
         # --------------------------------------------------------------------------------------------------------------
-        elif self.type_of_exploration == "PCINCC":
+        elif self.type_of_exploration == "LCIENCC":  # Local Circle Interference Exploration, Neighbour Cell Control
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
             cells = []  # this list it will contain both coordinates and probability of a cell
