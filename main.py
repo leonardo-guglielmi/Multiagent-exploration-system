@@ -37,10 +37,18 @@ def main():
             f.write("Simulations completed\n")
 
 
-        # this dictionary is used to convert types of search into numbers for indexing
-        types_of_search_dict = {"systematic search": 0, "local search": 1, "annealing forward search": 2,
-                                "annealing reverse search": 3, "penalty search": 4}
-        expl_weights_dict = {"constant": 0, "decrescent": 1}
+        # dictionaries used to convert types of search & exploration weights into numbers for indexing
+        types_of_search_dict = { }
+        index = 0
+        for search_type in types_of_search:
+            types_of_search_dict[f"{search_type} search"] = index
+            index += 1
+
+        expl_weights_dict = { }
+        index = 0
+        for expl_weight in expl_weights:
+            expl_weights_dict[f"{expl_weight}"] = index
+            index += 1
 
         # load results into 4D matrix, for each type of search, for each exploration weight, for each simulation load coverage history of that simulation
         coverages: list[list[list[list[float]]]] = [[[] for _ in range(len(expl_weights))] for _ in range(len(types_of_search))]
