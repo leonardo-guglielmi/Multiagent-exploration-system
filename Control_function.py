@@ -41,8 +41,8 @@ class Control_function:
         # --------------------------------------------------------------------------------------------------------------
 
         # Matrix that correlates each cell with the likelihood of a user in that area
-        self.__prob_matrix = numpy.zeros( (int(AREA_WIDTH / EXPLORATION_REGION_WIDTH),
-                                            int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH)) )
+        self.__prob_matrix = numpy.zeros((int(AREA_WIDTH / EXPLORATION_CELL_WIDTH),
+                                            int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH)))
 
         # List of bools, used just to see if a user pass from "covered" to "uncovered" and modify correctly the probability in that cell
         self.__user_coverage_list = []
@@ -365,8 +365,8 @@ class Control_function:
     @staticmethod
     # given indices of probability matrix, returns the coordinates of cell center (created for code clarity)
     def get_cell_center(cell_x, cell_y):
-        return (cell_x * EXPLORATION_REGION_WIDTH + EXPLORATION_REGION_WIDTH / 2,
-                cell_y * EXPLORATION_REGION_HEIGTH + EXPLORATION_REGION_HEIGTH / 2)
+        return (cell_x * EXPLORATION_CELL_WIDTH + EXPLORATION_CELL_WIDTH / 2,
+                cell_y * EXPLORATION_CELL_HEIGTH + EXPLORATION_CELL_HEIGTH / 2)
 
     @staticmethod
     # used to elaborate global exploration level
@@ -440,18 +440,18 @@ class Control_function:
         elif self.type_of_exploration == "PSI": # PSI := Proximity Square Interference
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
@@ -498,18 +498,18 @@ class Control_function:
         elif self.type_of_exploration == "PSINCC": # Proximity Square Interference, Neighbour Cell Check
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
@@ -565,18 +565,18 @@ class Control_function:
         elif self.type_of_exploration == "PCI":  # Proximity Circle Interference
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
             cells = []  # this list it will contain both coordinates and probability of a cell
             for i in range(inf_x, sup_x):
@@ -622,18 +622,18 @@ class Control_function:
         elif self.type_of_exploration == "PCINCC":
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_REGION_WIDTH)
+            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
+            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_REGION_WIDTH)
-            if sup_x >= int(AREA_WIDTH / EXPLORATION_REGION_WIDTH):
-                sup_x = int(AREA_WIDTH / EXPLORATION_REGION_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_REGION_HEIGTH)
-            if sup_y >= int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH):
-                sup_y = int(AREA_LENGTH / EXPLORATION_REGION_HEIGTH) - 1
+            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
+                sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
+            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
+                sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
             cells = []  # this list it will contain both coordinates and probability of a cell
             num_cells = 0
@@ -681,7 +681,7 @@ class Control_function:
                                     if i + 1 < len(cells) \
                                         and j < len(cells[i + 1]) \
                                         and cells[i + 1][j]["prob"] != 0 \ 
-                                        and cells[i][j]["pos"] == tuple(map(sum,zip(cells[i + 1][j]["pos"],(EXPLORATION_REGION_WIDTH,0)))):  # check for lateral, modify  below
+                                        and cells[i][j]["pos"] == tuple(map(sum, zip(cells[i + 1][j]["pos"], (EXPLORATION_CELL_WIDTH, 0)))):  # check for lateral, modify  below
                                         checked_cells.append(cells[i][j]["pos"])
                                     break
             max_SINR_per_cell = [[max(SINR_matrix[i][j]) if len(SINR_matrix[i][j]) != 0 else 0 for j in range(len(cells[i]))] for i in range(len(cells))]
