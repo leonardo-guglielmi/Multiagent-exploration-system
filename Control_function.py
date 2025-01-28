@@ -42,9 +42,6 @@ class Control_function:
         self.__prob_matrix = numpy.zeros((int(AREA_WIDTH / EXPLORATION_CELL_WIDTH),
                                             int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH)))
 
-        # List of bools, used just to see if a user pass from "covered" to "uncovered" and modify correctly the probability in that cell
-        self.__user_coverage_list = []
-
     # ==================================================================================================================
     # Methods for agents connectivity
     # ==================================================================================================================
@@ -670,12 +667,12 @@ class Control_function:
                 matrix[i, j] = 0 if self.__is_cell_covered(i, j) \
                     else (1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
 
-        # old_user_cov is bool, new_user is an object (otherwise it's necessary to do a deepcopy of users list, not so efficient)
-        for old_user_cov, actual_user in zip(self.__user_coverage_list, self.users):
-            if old_user_cov and not actual_user.is_covered:
-                user_x, user_y = actual_user.get_position()
-                cell_x = int(user_x / EXPLORATION_REGION_WIDTH)
-                cell_y = int(user_y / EXPLORATION_REGION_HEIGTH)
+        for user in self.users:
+            if len(user.coverage_history) >= 2 \
+                    and not user.coverage_history[-1] and user.coverage_history[-2]: # TODO TEST THIS IMMEDIATLY
+                user_x, user_y = user.get_position()
+                cell_x = int(user_x / EXPLORATION_CELL_WIDTH)
+                cell_y = int(user_y / EXPLORATION_CELL_HEIGTH)
                 matrix[cell_x][cell_y] = 1
 
     # used to automatically update the prob_matrix from outside
@@ -686,6 +683,3 @@ class Control_function:
     # returns a snapshot of prob_matrix
     def get_prob_matrix_snapshot(self):
         return copy.deepcopy(self.__prob_matrix)
-
-    def get_user_coverage_list(self):
-        return [user.is_covered for user in self.users]
