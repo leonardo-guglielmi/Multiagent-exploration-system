@@ -687,12 +687,16 @@ class Control_function:
         else:
             raise Exception("Invalid expl_weight")
 
-    def __update_prob_matrix(self, matrix):
+    def __update_prob_matrix(self, matrix, init=False):
         for i in range(matrix.shape[0]):
             for j in range(matrix.shape[1]):
-                matrix[i, j] = 0 if self.__is_cell_covered(i, j) \
-                    else (1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY \
-                         + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
+                if self.__is_cell_covered(i, j):
+                    matrix[i, j] = 0
+                elif init:
+                    matrix[i, j] = INIT_PROBABLITY
+                else:
+                    matrix[i, j] =(1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY \
+                            + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
 
         for user in self.users:
             if len(user.coverage_history) >= 2 \
