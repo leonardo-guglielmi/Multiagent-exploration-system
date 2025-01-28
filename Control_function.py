@@ -414,6 +414,16 @@ class Control_function:
 
         return inf_x, inf_y, sup_x, sup_y
 
+    # Returns the list of those sensor whose interference is not negligible
+    def __get_relevant_agents(self, agent):
+        relevant_agents = []
+        for sensor in self.agents + self.base_stations:
+            if (sensor != agent
+                    and math.dist(sensor.get_2D_position(), agent.get_2D_position()) <= agent.communication_radius * 2
+            ):
+                relevant_agents.append(sensor)
+        relevant_agents.append(agent)
+        return relevant_agents
 
     # Evaluate the exploration gain after agent's movement
     def __evaluate_new_exploration(self, agent):
