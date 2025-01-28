@@ -173,9 +173,9 @@ def main():
         plot_statistics_comparison("exploration", "min")
 
     except Exception as e:
-        with open("error_log.txt", "w") as f:
+        with open("logs/error_log.txt", "w") as f:
             f.write(str(e))
-        with open("output_log.txt", 'a') as f:
+        with open("logs/output_log.txt", 'a') as f:
             f.write(str(e))
         raise e
 

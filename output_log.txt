@@ -1,4 +1,0 @@
-Simulations begin: 2025-01-23 17:14:45.111592
------ Starting simulation [local-constant] : 0 -----
-Start coverage level: 0.0
-Start exploration level: 0.900000000000091
