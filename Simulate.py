@@ -45,7 +45,6 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     prob_matrix_history = []
 
     dto = DTO(type_of_search=type_of_search,
-              type_of_coverage="interference",
               type_of_exploration="PCINCC",
               expl_weight=expl_weight,
               is_concurrent=True,

@@ -19,7 +19,6 @@ class Control_function:
         # extracting dto information and load simulation config
         # --------------------------------------------------------------------------------------------------------------
         self.type_of_search = dto.type_of_search
-        self.type_of_coverage = dto.type_of_coverage
         self.type_of_exploration = dto.type_of_exploration
         self.expl_weight = dto.expl_weight
         self.concurrent_mode = dto.is_concurrent
@@ -202,38 +201,17 @@ class Control_function:
 
         return RCR / len(self.users)
 
-    def __RCR_no_interference(self, set_flag=False):
-        RCR = 0
-        if self.__connection_test():
-            for user in self.users:
-                user_covered_flag = False
-                for sensor in self.agents + self.base_stations:
-                    if math.dist(sensor.get_3D_position(), user.get_3D_position()) < sensor.communication_radius:
-                        RCR += 1
-                        user_covered_flag = True
-                        break
-                if set_flag:
-                    user.set_is_covered(user_covered_flag)
-        return RCR / len(self.users)
 
     # returns the RCR after an agent moves
     def RCR_after_move(self):
+        interference_powers = [[0 for _ in range(len(self.users))] for _ in
+                               range(len(self.agents) + len(self.base_stations))]
+        for user in self.users:
+            for sensor in self.agents + self.base_stations:
+                interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
 
-        if self.type_of_coverage == "simple":
-            return self.__RCR_no_interference(True)
-
-        elif self.type_of_coverage == "interference":
-            interference_powers = [[0 for _ in range(len(self.users))] for _ in
-                                   range(len(self.agents) + len(self.base_stations))]
-            for user in self.users:
-                for sensor in self.agents + self.base_stations:
-                    interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
-
-            SINR_matrix = self.__SINR(interference_powers)
-            return self.__RCR_interference(SINR_matrix, True)
-
-        else:
-            raise Exception("Invalid type_of_coverage")
+        SINR_matrix = self.__SINR(interference_powers)
+        return self.__RCR_interference(SINR_matrix, True)
 
     # ==================================================================================================================
     # method that samples new points
@@ -297,13 +275,12 @@ class Control_function:
         best_point = None
         best_reward = -1
 
-        if self.type_of_coverage == "interference":
-            # store powers of the actual interference
-            partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
-                                       range(len(other_agents) + len(self.base_stations) + 1)]
-            for user in self.users:
-                for sensor in [agent] + other_agents + self.base_stations:
-                    partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
+        # store powers of the actual interference
+        partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
+                                   range(len(other_agents) + len(self.base_stations) + 1)]
+        for user in self.users:
+            for sensor in [agent] + other_agents + self.base_stations:
+                partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
 
         best_expl_evaluation = 0 # used for debug
         # iters through new sampled points and the actual position (it may don't move)
@@ -314,22 +291,15 @@ class Control_function:
             original_position = agent.get_2D_position()
             agent.set_2D_position(point[0], point[1])
 
-            if self.type_of_coverage == "interference":
-                interference_powers_new_position = copy.deepcopy(partial_interference_powers)
+            interference_powers_new_position = copy.deepcopy(partial_interference_powers)
 
-                # update interferences power with new agent position
-                for user in self.users:
-                    for sensor in other_agents + self.base_stations:
-                        interference_powers_new_position[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
+            # update interferences power with new agent position
+            for user in self.users:
+                for sensor in other_agents + self.base_stations:
+                    interference_powers_new_position[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
 
-                SINR_matrix = self.__SINR(interference_powers_new_position)
-                new_coverage_level = self.__RCR_interference(SINR_matrix)
-
-            elif self.type_of_coverage == "simple":
-                new_coverage_level = self.__RCR_no_interference()
-
-            else:
-                raise Exception("Invalid type_of_coverage")
+            SINR_matrix = self.__SINR(interference_powers_new_position)
+            new_coverage_level = self.__RCR_interference(SINR_matrix)
 
             new_expl_level = self.__evaluate_new_exploration(agent)
 
