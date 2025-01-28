@@ -440,16 +440,16 @@ class Control_function:
         elif self.type_of_exploration == "PSI": # PSI := Proximity Square Interference
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
                 sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
                 sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
@@ -498,16 +498,16 @@ class Control_function:
         elif self.type_of_exploration == "PSINCC": # Proximity Square Interference, Neighbour Cell Check
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
                 sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
                 sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
@@ -565,16 +565,16 @@ class Control_function:
         elif self.type_of_exploration == "PCI":  # Proximity Circle Interference
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
                 sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
                 sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
@@ -622,16 +622,16 @@ class Control_function:
         elif self.type_of_exploration == "PCINCC":
 
             # control to not exceed area limits
-            inf_x = int((agent.get_x() - agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            inf_x = int((agent.get_x() - EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if inf_x < 0:
                 inf_x = 0
-            inf_y = int((agent.get_y() - agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            inf_y = int((agent.get_y() - EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if inf_y < 0:
                 inf_y = 0
-            sup_x = int((agent.get_x() + agent.communication_radius) / EXPLORATION_CELL_WIDTH)
+            sup_x = int((agent.get_x() + EXPLORATION_RADIUS) / EXPLORATION_CELL_WIDTH)
             if sup_x >= int(AREA_WIDTH / EXPLORATION_CELL_WIDTH):
                 sup_x = int(AREA_WIDTH / EXPLORATION_CELL_WIDTH) - 1
-            sup_y = int((agent.get_y() + agent.communication_radius) / EXPLORATION_CELL_HEIGTH)
+            sup_y = int((agent.get_y() + EXPLORATION_RADIUS) / EXPLORATION_CELL_HEIGTH)
             if sup_y >= int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH):
                 sup_y = int(AREA_LENGTH / EXPLORATION_CELL_HEIGTH) - 1
 
