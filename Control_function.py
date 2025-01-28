@@ -68,7 +68,7 @@ class Control_function:
     def __connection_test(self):
         return self.is_connected(self.__calculate_graph())
 
-    # return the actual connectivity status, used only for debug purposes
+    # Return the actual connectivity status, used only for debug purposes
     def get_agents_graph_connection(self):
         return self.__is_connected_flag
 
@@ -107,8 +107,7 @@ class Control_function:
             self.__update_sensors_graph()
 
 
-    # this function detects if the specified agent is coupled with another agents, and returns the proper deviation to
-    # unlock this situation
+    # Detects if the specified agent is coupled with another agents, and returns the proper deviation to move it away
     def agent_coupling_detection(self, agent):
         deviation = (0,0)
         if len(agent.trajectory) > DECOUPLING_HISTORY_DEPTH:
@@ -123,17 +122,16 @@ class Control_function:
         return deviation
 
     # ==================================================================================================================
-    # Methods for the signal analysis
+    # Methods for the SIGNAL analysis
     # ==================================================================================================================
 
     @staticmethod
-    # return the channel gain between agent and user
+    # Return the channel gain between agent and user
     def channel_gain(current_sensor, current_user):
-        # from file:///C:/Users/andrea/OneDrive/Desktop/uni/Tesi/Dynamic_Coverage_Control_of_Multi_Agent_Systems_v1.pdf
         return PATH_GAIN / math.pow(math.dist(current_sensor.get_3D_position(), current_user.get_position() + (0,)), 2)
 
     @staticmethod
-    # returns the channel gain between two points p1 and p2
+    # Returns the channel gain between two points p1 and p2
     def channel_gain_by_position(p1, p2):
         # adjusting dimension to avoid errors
         if len(p1) <= 2:
@@ -142,28 +140,43 @@ class Control_function:
             p2 += (0,)
         return PATH_GAIN / math.pow(math.dist(p1, p2), 2)
 
-    # returns the total power of interferences that disturbs the signal between sensor and user
+    # Returns the total power of interferences that disturbs the signal between sensor and user
     def __interference_power(self, sensor, user, other_agents):
         interference_power = 0
         for other_sensor in other_agents + self.base_stations:
-            if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also the target sensor when called
-                if (isinstance(sensor, Agent) and isinstance(other_sensor,Base_station) and not other_sensor.interference_by_bs) \
-                        or (isinstance(sensor, Base_station) and isinstance(other_sensor,Agent) and not sensor.interference_by_bs):
+            if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also
+                                              # the target sensor when called
+                if ( isinstance(sensor, Agent)
+                    and isinstance(other_sensor,Base_station)
+                    and not other_sensor.interference_by_bs
+                    ) or (
+                    isinstance(sensor, Base_station)
+                    and isinstance(other_sensor,Agent)
+                    and not sensor.interference_by_bs
+                ):
                     continue
                 else:
                     interference_power += self.channel_gain(other_sensor, user) * other_sensor.transmitting_power
         return interference_power
 
-    # return the total power of interferences that disturbs the sensor's signal in some point of space
+    # Return the total power of interferences that disturbs the sensor's signal in some point of space
     def __interference_powers_by_position(self, sensor, point, other_sensors):
         interference_pow = 0
         for other_sensor in other_sensors:
-            if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also the target sensor when called
-                if (isinstance(sensor, Agent) and isinstance(other_sensor, Base_station) and not other_sensor.interference_by_bs) \
-                        or (isinstance(sensor, Base_station) and isinstance(other_sensor, Agent) and not sensor.interference_by_bs):
+            if other_sensor.id != sensor.id:  # this is necessary because other_agents may contain also
+                                              # the target sensor when called
+                if (isinstance(sensor, Agent)
+                    and isinstance(other_sensor, Base_station)
+                    and not other_sensor.interference_by_bs
+                ) or (
+                        isinstance(sensor, Base_station)
+                        and isinstance(other_sensor, Agent)
+                        and not sensor.interference_by_bs
+                ):
                     continue
                 else:
-                    interference_pow += self.channel_gain_by_position(other_sensor.get_3D_position(), point) * other_sensor.transmitting_power
+                    interference_pow += ( self.channel_gain_by_position(other_sensor.get_3D_position(), point) *
+                                         other_sensor.transmitting_power )
         return interference_pow
 
     # returns a matrix that associate at each user the SINR of each agent
@@ -173,15 +186,17 @@ class Control_function:
         for sensor in self.agents + self.base_stations:
             for user in self.users:
                 SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
-                        interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH)
+                        interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH )
         return SINR_matrix
 
     # ==================================================================================================================
-    # Methods for the RCR
+    # Methods for RCR
     # ==================================================================================================================
 
     def __RCR_interference(self, SINR_matrix, set_flag=False):
         RCR = 0
+
+        # only if the backhaul network is not available, check for agents' connectivity
         if not self.backhaul_network_available:
             is_graph_connected = self.__connection_test()
 
@@ -189,7 +204,7 @@ class Control_function:
         for user in self.users:
             user_covered_flag = False
             if total_SINR_per_user[user.id] - user.desired_coverage_level > 0 \
-                    and (self.backhaul_network_available or is_graph_connected): # uses short-circuit evaluation
+                    and (self.backhaul_network_available or is_graph_connected): # lazy evaluation
                 RCR += 1
                 user_covered_flag = True
             if set_flag:
@@ -198,10 +213,11 @@ class Control_function:
         return RCR / len(self.users)
 
 
-    # returns the RCR after an agent moves
+    # Returns the RCR value after the agents' movement
     def RCR_after_move(self):
-        interference_powers = [[0 for _ in range(len(self.users))] for _ in
-                               range(len(self.agents) + len(self.base_stations))]
+        interference_powers = [ [0 for _ in range(len(self.users))]
+                                for _ in range(len(self.agents) + len(self.base_stations))
+                              ]
         for user in self.users:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
@@ -210,7 +226,7 @@ class Control_function:
         return self.__RCR_interference(SINR_matrix, True)
 
     # ==================================================================================================================
-    # method that samples new points
+    # Method that SAMPLES new points
     # ==================================================================================================================
     def get_points(self, agent, other_agents, t):
 
@@ -253,11 +269,15 @@ class Control_function:
             new_points = copy.deepcopy(points)
             for point in points:
                 for other_agent in other_agents:
-                    delta_distance = math.dist(point, other_agent.get_2D_position()) - math.dist(point,
-                                                                                                 agent.get_2D_position())
+                    delta_distance = ( math.dist(point, other_agent.get_2D_position())
+                                      - math.dist(point,agent.get_2D_position())
+                                    )
                     # man mano che t aumenta, la probabilità di rimuovere un punto lontano diminuisce
                     if delta_distance < 0 and random.random() < (
-                            t / NUM_OF_ITERATIONS if self.type_of_search == "annealing forward" else 1 - t / NUM_OF_ITERATIONS):
+                            t / NUM_OF_ITERATIONS
+                            if self.type_of_search == "annealing forward"
+                            else 1 - t / NUM_OF_ITERATIONS
+                    ):
                         new_points.remove(point)
                         break
             points = new_points
@@ -266,19 +286,20 @@ class Control_function:
     # ==================================================================================================================
     # Method that choose between the sampled points of an agent
     # ==================================================================================================================
-
     def find_goal_point_for_agent(self, agent, other_agents, t, print_expl_eval=False):
         best_point = None
         best_reward = -1
 
         # store powers of the actual interference
-        partial_interference_powers = [[0 for _ in range(len(self.users))] for _ in
-                                   range(len(other_agents) + len(self.base_stations) + 1)]
+        partial_interference_powers = [ [0 for _ in range(len(self.users))] for _ in
+                                        range(len(other_agents) + len(self.base_stations) + 1)
+                                    ]
         for user in self.users:
             for sensor in [agent] + other_agents + self.base_stations:
                 partial_interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, other_agents)
 
-        best_expl_evaluation = 0 # used for debug
+        best_expl_evaluation = 0 # used for DEBUG
+
         # iters through new sampled points and the actual position (it may don't move)
         i = 0
         for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, t):
@@ -292,7 +313,8 @@ class Control_function:
             # update interferences power with new agent position
             for user in self.users:
                 for sensor in other_agents + self.base_stations:
-                    interference_powers_new_position[sensor.id][user.id] += agent.transmitting_power * self.channel_gain(agent, user)
+                    interference_powers_new_position[sensor.id][user.id] += ( agent.transmitting_power *
+                                                                            self.channel_gain(agent, user) )
 
             SINR_matrix = self.__SINR(interference_powers_new_position)
             new_coverage_level = self.__RCR_interference(SINR_matrix)
@@ -311,17 +333,19 @@ class Control_function:
             i += 1
 
             reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
-
-            if reward_under_test > best_reward or (reward_under_test == best_reward and
-                                                   math.dist(agent.get_2D_position(), point) > math.dist(
-                                                    agent.get_2D_position(), best_point)):
+            if reward_under_test > best_reward or (reward_under_test == best_reward
+                                                   and math.dist(agent.get_2D_position(), point) >
+                                                   math.dist(agent.get_2D_position(), best_point)
+            ):
                 best_reward = reward_under_test
                 best_point = point
                 best_expl_evaluation = new_expl_level
 
             agent.set_2D_position(original_position[0], original_position[1])
         if print_expl_eval:
-            print(f"DEBUG: Agent {agent.id} best exploration evaluation {best_expl_evaluation}") # uncomment this for DEBUG
+            # output for DEBUG
+            print(f"DEBUG: Agent {agent.id} best exploration evaluation {best_expl_evaluation}")
+
         return best_point
 
     # ==================================================================================================================
@@ -329,13 +353,13 @@ class Control_function:
     # ==================================================================================================================
 
     @staticmethod
-    # given indices of probability matrix, returns the coordinates of cell center (created for code clarity)
+    # Given indices of probability matrix, returns the coordinates of cell center (created for code clarity)
     def get_cell_center(cell_x, cell_y):
         return (cell_x * EXPLORATION_CELL_WIDTH + EXPLORATION_CELL_WIDTH / 2,
                 cell_y * EXPLORATION_CELL_HEIGTH + EXPLORATION_CELL_HEIGTH / 2)
 
     @staticmethod
-    # used to elaborate global exploration level
+    # Get the exploration level of the given matrix
     def exploration_level(prob_matrix):
         expl = prob_matrix.size
         for i in range(prob_matrix.shape[0]):
@@ -343,19 +367,19 @@ class Control_function:
                 expl -= prob_matrix[i, j]
         return expl / prob_matrix.size
 
-    # used to call this function on the cf's prob matrix from outside
+    # Returns actual global exploration level
     def get_exploration_level(self):
         return self.exploration_level(self.__prob_matrix)
 
-    # tests if one exploration cell is covered
+    # Return the given exploration cell is covered
     def __is_cell_covered(self, cell_x, cell_y):
         result = False
         point = self.get_cell_center(cell_x, cell_y) + (0,)
 
         # if not using backhaul network, checks for network connectivity
-        # uses the flag attribute just because __connection_test() should be already called in __RCR(),
-        # if it's not the case the connection test function must be called here
-        if self.backhaul_network_available or self.__is_connected_flag:
+        # uses the cf's flag just because __connection_test() should be already called in __RCR(), if
+        # it's not the case the connection function must be called here
+        if self.backhaul_network_available or self.__is_connected_flag: # lazy evaluation
 
             # simpler method, an exploration cell is considered explored when it's center is near to some sensor
             if self.type_of_exploration == "simple":
@@ -364,22 +388,25 @@ class Control_function:
                         result = True
                         break
 
-            # this method takes into account interferences from other sensor to decide if a cell is explored or not
-            elif self.type_of_exploration == "PSI" \
-                    or self.type_of_exploration == "PSINCC" \
-                    or self.type_of_exploration == "PCI" \
-                    or self.type_of_exploration == "PCINCC":
+            # these methods take into account interferences from other sensor to decide if a cell is explored or not
+            elif self.type_of_exploration == "LSIE" \
+                    or self.type_of_exploration == "LSIENCC" \
+                    or self.type_of_exploration == "LCIE" \
+                    or self.type_of_exploration == "LCIENCC":
 
                 sensors_interference = [0 for _ in self.agents + self.base_stations]
                 for sensor in self.agents + self.base_stations:
-                    sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point,
-                                                                                             self.agents + self.base_stations)
+                    sensors_interference[sensor.id] = self.__interference_powers_by_position(sensor, point
+                                                                                             , self.agents
+                                                                                             + self.base_stations)
                 sensors_SINR = [0 for _ in self.agents + self.base_stations]
 
                 for sensor in self.agents + self.base_stations:
-                    sensors_SINR[sensor.id] = (self.channel_gain_by_position(sensor.get_3D_position(),
-                                                                             point) * sensor.transmitting_power) / (
-                                                      sensors_interference[sensor.id] + PSDN * BANDWIDTH)
+                    sensors_SINR[sensor.id] = (
+                                            self.channel_gain_by_position(sensor.get_3D_position(), point)
+                                            * sensor.transmitting_power
+                                            / (sensors_interference[sensor.id] + PSDN * BANDWIDTH)
+                                        )
                     if sensors_SINR[sensor.id] > DESIRED_COVERAGE_LEVEL:
                         result = True
                         break
@@ -439,37 +466,31 @@ class Control_function:
         elif self.type_of_exploration == "LSIE": # Local Square Interference Exploration
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
-            cells = []  # this list it will contain both coordinates and probability of a cell
+            cells = []  # this list will contain both coordinates and probability of the cells
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
                     cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
-            # select only those agents that are sufficiently close to the agent I'm watching
-            relevant_agents = []
-            for sensor in self.agents + self.base_stations:
-                if (sensor != agent
-                        and math.dist(sensor.get_2D_position(),
-                                      agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
-                    relevant_agents.append(sensor)
-            relevant_agents.append(agent)
+            relevant_agents = self.__get_relevant_agents(agent)
 
             interference_powers = numpy.zeros((len(cells), len(relevant_agents)))
-
-            # excluding cells which have probability =0 (eg are covered) from exploration
+            # excluding cells which have probability =0 (e.g. are covered) from exploration
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
-                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
-                                                                                           cells[k]["pos"], relevant_agents)
+                        interference_powers[k][j] = self.__interference_powers_by_position( relevant_agents[j]
+                                                                                            , cells[k]["pos"]
+                                                                                            , relevant_agents )
 
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
                         for j in range(len(relevant_agents)):
-                            SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
-                                                                                cells[k]["pos"]) * relevant_agents[
-                                                      j].transmitting_power) /
-                                                 (interference_powers[k][j] + PSDN * BANDWIDTH))
+                            SINR_matrix[k][j] = (self.channel_gain_by_position( relevant_agents[j].get_3D_position()
+                                                                                , cells[k]["pos"] )
+                                                  * relevant_agents[j].transmitting_power
+                                                  / (interference_powers[k][j] + PSDN * BANDWIDTH)
+                                                 )
 
             max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
 
@@ -479,31 +500,25 @@ class Control_function:
             exploration_level /= len(cells)
 
         # --------------------------------------------------------------------------------------------------------------
-        # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
-        # uses only those cells to evaluate exploration gain
+        # adds SINR prediction on neighbour cells to the LSIE method
         elif self.type_of_exploration == "LSIENCC": # Local Square Interference Exploration, Neighbour Cell Check
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
-            cells = []  # this list it will contain both coordinates and probability of a cell
+            cells = []  # this list will contain both coordinates and probability of the cells
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
                     cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
-            # select only those agents that are sufficiently close to the agent I'm watching
-            relevant_agents = []
-            for sensor in self.agents + self.base_stations:
-                if (sensor != agent
-                        and math.dist(sensor.get_2D_position(), agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
-                    relevant_agents.append(sensor)
-            relevant_agents.append(agent)
+            relevant_agents = self.__get_relevant_agents(agent)
 
             interference_powers = numpy.zeros((len(cells), len(relevant_agents)))
-
-            # excluding cells which have probability =0 (eg are covered) from exploration
+            # excluding cells which have probability =0 (e.g. are covered) from exploration
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
-                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j], cells[k]["pos"], relevant_agents)
+                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j]
+                                                                                           , cells[k]["pos"]
+                                                                                           , relevant_agents)
 
             already_checked_cells = []  # in this list I put those cells that have neighbor with high SINR
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
@@ -513,17 +528,24 @@ class Control_function:
                         SINR_matrix[k][0] = 1
                     else:
                         for j in range(len(relevant_agents)):
-                            SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(), cells[k]["pos"]) * relevant_agents[j].transmitting_power) /
-                                                         (interference_powers[k][j] + PSDN * BANDWIDTH))
+                            SINR_matrix[k][j] = (self.channel_gain_by_position( relevant_agents[j].get_3D_position()
+                                                                               , cells[k]["pos"] )
+                                                 * relevant_agents[j].transmitting_power
+                                                 / (interference_powers[k][j] + PSDN * BANDWIDTH)
+                                                 )
 
                             # if I get high SINR, mark also neighbor cells as relevant and exit from cycle
-                            if SINR_matrix[k][j] >= 0.85:
+                            if SINR_matrix[k][j] >= NEIGHBOUR_SINR_THRESHOLD:
+                                # check and mark upper cell
                                 if (k+1) % (sup_y -inf_y) != 0 and cells[k+1] != 0:
                                     already_checked_cells.append(k + 1)
+                                # check and mark right cell
                                 if (k+1) <= (sup_x -inf_x -1)*(sup_y -inf_y) and cells[k + sup_y - inf_y] != 0:
                                     already_checked_cells.append(k + sup_y - inf_y)
                                 break
-                # using some values to be safe: SINR=0, the cells doesn't contribute to exploration, SINR=1 the cells contribute
+                # using some reference values for SINR:
+                # SINR=0, the cells doesn't contribute to exploration
+                # SINR=1 the cells contribute
 
             max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
 
@@ -533,43 +555,36 @@ class Control_function:
             exploration_level /= len(cells)
 
         # --------------------------------------------------------------------------------------------------------------
-        # only examines local impacts of agent's movement: selects a square of cells centered in agent's position, and
-        # uses only those cells to evaluate exploration gain
-        elif self.type_of_exploration == "LCI":  # Local Circle Interference
+        # changes the area shape of LSIE, passing from square to circle
+        elif self.type_of_exploration == "LCIE":  # Local Circle Interference Exploration
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
-            cells = []  # this list it will contain both coordinates and probability of a cell
+            cells = []  # this list it will contain both coordinates and probability of the cells
             for i in range(inf_x, sup_x):
                 for j in range(inf_y, sup_y):
                     if math.dist(self.get_cell_center(i, j), agent.get_2D_position()) <= agent.communication_radius:
                         cells.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
 
-            # select only those agents that are sufficiently close to the agent I'm watching
-            relevant_agents = []
-            for sensor in self.agents + self.base_stations:
-                if (sensor != agent
-                        and math.dist(sensor.get_2D_position(),
-                                      agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius):
-                    relevant_agents.append(sensor)
-            relevant_agents.append(agent)
+            relevant_agents = self.__get_relevant_agents(agent)
 
             interference_powers = numpy.zeros((len(cells), len(relevant_agents)))
-
-            # excluding cells which have probability =0 (eg are covered) from exploration
+            # excluding cells which have probability =0 (e.g. are covered) from exploration
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
-                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j],
-                                                                                           cells[k]["pos"], relevant_agents)
+                        interference_powers[k][j] = self.__interference_powers_by_position(relevant_agents[j]
+                                                                                           , cells[k]["pos"]
+                                                                                           , relevant_agents)
 
             SINR_matrix = numpy.zeros((len(cells), len(relevant_agents)))
             for k in range(len(cells)):
                 if cells[k]["prob"] != 0:
                     for j in range(len(relevant_agents)):
-                        SINR_matrix[k][j] = ((self.channel_gain_by_position(relevant_agents[j].get_3D_position(),
-                                                                            cells[k]["pos"]) * relevant_agents[
-                                                  j].transmitting_power) /
-                                             (interference_powers[k][j] + PSDN * BANDWIDTH))
+                        SINR_matrix[k][j] = (self.channel_gain_by_position( relevant_agents[j].get_3D_position()
+                                                                           , cells[k]["pos"] )
+                                             * relevant_agents[j].transmitting_power
+                                             / (interference_powers[k][j] + PSDN * BANDWIDTH)
+                                             )
 
             max_SINR_per_cell = [max(cell_SINR) for cell_SINR in SINR_matrix]
 
@@ -582,30 +597,27 @@ class Control_function:
         elif self.type_of_exploration == "LCIENCC":  # Local Circle Interference Exploration, Neighbour Cell Control
 
             inf_x, inf_y, sup_x, sup_y = self.__get_local_bounds(agent.get_x(), agent.get_y())
-            cells = []  # this list it will contain both coordinates and probability of a cell
+            cells = []  # this "matrix" will contain both coordinates and probability of the cell
             num_cells = 0
             for i in range(inf_x, sup_x):
                 cells_column = []
                 for j in range(inf_y, sup_y):
                     if math.dist(self.get_cell_center(i, j), agent.get_2D_position()) <= agent.communication_radius:
-                        cells_column.append({"pos": self.get_cell_center(i, j) + (0,), "prob": self.__prob_matrix[i, j]})
+                        cells_column.append({"pos": self.get_cell_center(i, j) +(0,), "prob": self.__prob_matrix[i, j]})
                         num_cells += 1
                 if len(cells_column) > 0:
                     cells.append(cells_column)
 
-            # select only those agents that are sufficiently close to the agent I'm watching
-            relevant_agents = []
-            for sensor in self.agents + self.base_stations:
-                if sensor != agent and math.dist(sensor.get_2D_position(), agent.get_2D_position()) <= agent.communication_radius + sensor.communication_radius:
-                    relevant_agents.append(sensor)
-            relevant_agents.append(agent)
+            relevant_agents = self.__get_relevant_agents(agent)
 
             interference_powers = [[[] for _ in range(len(cells[i]))] for i in range(len(cells))]
             for i in range(len(cells)):
                 for j in range(len(cells[i])):
                     if cells[i][j]["prob"] != 0:
                         for k in range(len(relevant_agents)):
-                            interference_powers[i][j].append(self.__interference_powers_by_position(relevant_agents[k],cells[i][j]["pos"], relevant_agents))
+                            interference_powers[i][j] .append( self.__interference_powers_by_position(relevant_agents[k]
+                                                                                               , cells[i][j]["pos"]
+                                                                                               , relevant_agents) )
 
             SINR_matrix = [[[] for _ in range(len(cells[i]))] for i in range(len(cells))]
             checked_cells = []
@@ -616,19 +628,24 @@ class Control_function:
                             SINR_matrix.append(1)
                         else:
                             for k in range(len(relevant_agents)):
-                                SINR = (self.channel_gain_by_position(relevant_agents[k].get_3D_position(), cells[i][j]["pos"]) * relevant_agents[k].transmitting_power /
-                                                     (interference_powers[i][j][k] + PSDN * BANDWIDTH))
+                                SINR = (self.channel_gain_by_position(relevant_agents[k].get_3D_position()
+                                                                                   , cells[i][j]["pos"])
+                                                     * relevant_agents[k].transmitting_power
+                                                     / (interference_powers[i][j][k] + PSDN * BANDWIDTH)
+                                        )
                                 SINR_matrix[i][j].append(SINR)
 
                                 if SINR >= NEIGHBOUR_SINR_THRESHOLD:
+                                    # check and mark upper cell
                                     if j + 1 < len(cells[i]) \
-                                        and cells[i][j + 1]["prob"] != 0:  # check for upper cell
+                                            and cells[i][j + 1]["prob"] != 0:  # check for upper cell
                                         checked_cells.append(cells[i][j]["pos"])
-
+                                    # check and mark right cell
                                     if i + 1 < len(cells) \
-                                        and j < len(cells[i + 1]) \
-                                        and cells[i + 1][j]["prob"] != 0 \ 
-                                        and cells[i][j]["pos"] == tuple(map(sum, zip(cells[i + 1][j]["pos"], (EXPLORATION_CELL_WIDTH, 0)))):  # check for lateral, modify  below
+                                            and j < len(cells[i + 1]) \
+                                            and cells[i + 1][j]["prob"] != 0 \
+                                            and cells[i][j]["pos"] == tuple(map(sum, zip(cells[i + 1][j]["pos"], (EXPLORATION_CELL_WIDTH, 0)))) \
+                                        :  # TODO FIX THIS
                                         checked_cells.append(cells[i][j]["pos"])
                                     break
             max_SINR_per_cell = [[max(SINR_matrix[i][j]) if len(SINR_matrix[i][j]) != 0 else 0 for j in range(len(cells[i]))] for i in range(len(cells))]
@@ -644,13 +661,13 @@ class Control_function:
 
         return exploration_level
 
-    # return the exploration weight in objective function
+    # Returns the exploration weight in objective function
     def exploration_weight(self, type_of_weight):
         # constant weight
         if type_of_weight == "constant":
             return EXPLORATION_WEIGHT
 
-        # Weight that decreases as the number of covered users increases
+        # weight that decreases as the number of covered users increases
         elif type_of_weight == "decrescent":
             num_user_covered = 0
             for user in self.users:
@@ -665,21 +682,21 @@ class Control_function:
         for i in range(matrix.shape[0]):
             for j in range(matrix.shape[1]):
                 matrix[i, j] = 0 if self.__is_cell_covered(i, j) \
-                    else (1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
+                    else (1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY \
+                         + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
 
         for user in self.users:
             if len(user.coverage_history) >= 2 \
-                    and not user.coverage_history[-1] and user.coverage_history[-2]: # TODO TEST THIS IMMEDIATLY
+                    and not user.coverage_history[-1] and user.coverage_history[-2]:
                 user_x, user_y = user.get_position()
                 cell_x = int(user_x / EXPLORATION_CELL_WIDTH)
                 cell_y = int(user_y / EXPLORATION_CELL_HEIGTH)
                 matrix[cell_x][cell_y] = 1
 
-    # used to automatically update the prob_matrix from outside
+    # Used to automatically update the prob_matrix from outside
     def update_probability_distribution_matrix(self):
         self.__update_prob_matrix(self.__prob_matrix)
-        self.__user_coverage_list = self.get_user_coverage_list()
 
-    # returns a snapshot of prob_matrix
+    # Returns a snapshot of prob_matrix
     def get_prob_matrix_snapshot(self):
         return copy.deepcopy(self.__prob_matrix)
