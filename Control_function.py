@@ -20,7 +20,6 @@ class Control_function:
         self.type_of_search = dto.type_of_search
         self.type_of_exploration = dto.type_of_exploration
         self.expl_weight = dto.expl_weight
-        self.concurrent_mode = dto.is_concurrent
         self.backhaul_network_available = dto.backhaul_network_available
 
         # --------------------------------------------------------------------------------------------------------------
@@ -87,9 +86,9 @@ class Control_function:
     # ==================================================================================================================
 
     # Moves agents in their goal point
-    def move_agents(self):
+    def __move_agents(self):
         for agent in self.agents:
-            coupling_deviation = self.agent_coupling_detection(agent)
+            coupling_deviation = self.__agent_coupling_detection(agent)
             delta_x = agent.goal_point[0] - agent.get_x() + coupling_deviation[0]
             delta_y = agent.goal_point[1] - agent.get_y() + coupling_deviation[1]
             distance = math.dist(agent.goal_point, agent.get_2D_position())
@@ -108,7 +107,7 @@ class Control_function:
 
 
     # Detects if the specified agent is coupled with another agents, and returns the proper deviation to move it away
-    def agent_coupling_detection(self, agent):
+    def __agent_coupling_detection(self, agent):
         deviation = (0,0)
         if len(agent.trajectory) > DECOUPLING_HISTORY_DEPTH:
             for other_agent in self.agents:
@@ -228,7 +227,7 @@ class Control_function:
     # ==================================================================================================================
     # Method that SAMPLES new points
     # ==================================================================================================================
-    def get_points(self, agent, other_agents, t):
+    def __get_points(self, agent, other_agents, t):
 
         points_x = []
         points_y = []
@@ -302,7 +301,7 @@ class Control_function:
 
         # iters through new sampled points and the actual position (it may don't move)
         i = 0
-        for point in [agent.get_2D_position()] + self.get_points(agent, other_agents, t):
+        for point in [agent.get_2D_position()] + self.__get_points(agent, other_agents, t):
 
             # move the agent and store its old position
             original_position = agent.get_2D_position()
@@ -332,7 +331,7 @@ class Control_function:
 
             i += 1
 
-            reward_under_test = new_coverage_level + self.exploration_weight(self.expl_weight) * new_expl_level
+            reward_under_test = new_coverage_level + self.__exploration_weight() * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward
                                                    and math.dist(agent.get_2D_position(), point) >
                                                    math.dist(agent.get_2D_position(), best_point)
@@ -671,13 +670,13 @@ class Control_function:
         return exploration_level
 
     # Returns the exploration weight in objective function
-    def exploration_weight(self, type_of_weight):
+    def __exploration_weight(self):
         # constant weight
-        if type_of_weight == "constant":
+        if self.expl_weight == "constant":
             return EXPLORATION_WEIGHT
 
         # weight that decreases as the number of covered users increases
-        elif type_of_weight == "decrescent":
+        elif self.expl_weight == "decrescent":
             num_user_covered = 0
             for user in self.users:
                 if user.is_covered:
