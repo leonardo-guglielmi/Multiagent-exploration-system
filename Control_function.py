@@ -696,7 +696,7 @@ class Control_function:
         else:
             raise Exception("Invalid expl_weight")
 
-    def __update_prob_matrix(self, matrix, init=False):
+    def __update_prob_matrix(self, matrix, init):
         for i in range(matrix.shape[0]):
             for j in range(matrix.shape[1]):
                 if self.__is_cell_covered(i, j):
@@ -716,8 +716,8 @@ class Control_function:
                 matrix[cell_x][cell_y] = 1
 
     # Used to automatically update the prob_matrix from outside
-    def update_probability_distribution_matrix(self):
-        self.__update_prob_matrix(self.__prob_matrix)
+    def update_probability_distribution_matrix(self, init=False):
+        self.__update_prob_matrix(self.__prob_matrix, init=init)
 
     # Returns a snapshot of prob_matrix
     def get_prob_matrix_snapshot(self):
