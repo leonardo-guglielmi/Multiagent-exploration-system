@@ -179,20 +179,21 @@ class Control_function:
         return interference_pow
 
     # returns a matrix that associate at each user the SINR of each agent
-    def __SINR(self, interference_powers):
+    def __SINR(self, interference_powers, eval_all_users=False):
         SINR_matrix = numpy.zeros((len(self.agents) + len(self.base_stations), len(self.users)))
 
         for sensor in self.agents + self.base_stations:
             for user in self.users:
-                SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
-                        interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH )
+                if user.is_covered or eval_all_users:
+                    SINR_matrix[sensor.id][user.id] = (self.channel_gain(sensor, user) * sensor.transmitting_power) / (
+                            interference_powers[sensor.id][user.id] + PSDN * BANDWIDTH )
         return SINR_matrix
 
     # ==================================================================================================================
     # Methods for RCR
     # ==================================================================================================================
 
-    def __RCR_interference(self, SINR_matrix, set_flag=False):
+    def __RCR(self, SINR_matrix):
         RCR = 0
 
         # only if the backhaul network is not available, check for agents' connectivity
@@ -201,19 +202,19 @@ class Control_function:
 
         total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
         for user in self.users:
-            user_covered_flag = False
-            if total_SINR_per_user[user.id] - user.desired_coverage_level > 0 \
-                    and (self.backhaul_network_available or is_graph_connected): # lazy evaluation
+            if total_SINR_per_user[user.id] - user.desired_coverage_level > 0 and (self.backhaul_network_available or is_graph_connected): # lazy evaluation
                 RCR += 1
                 user_covered_flag = True
             if set_flag:
                 user.set_is_covered(user_covered_flag)
 
-        return RCR / len(self.users)
+        return RCR / self.__get_num_covered_users()
 
-
-    # Returns the RCR value after the agents' movement
+    # Returns the RCR value after the agents' movement, not used in control function
     def RCR_after_move(self):
+        if not self.backhaul_network_available:
+            is_graph_connected = self.__connection_test()
+
         interference_powers = [ [0 for _ in range(len(self.users))]
                                 for _ in range(len(self.agents) + len(self.base_stations))
                               ]
@@ -221,8 +222,18 @@ class Control_function:
             for sensor in self.agents + self.base_stations:
                 interference_powers[sensor.id][user.id] = self.__interference_power(sensor, user, self.agents)
 
-        SINR_matrix = self.__SINR(interference_powers)
-        return self.__RCR_interference(SINR_matrix, True)
+        SINR_matrix = self.__SINR(interference_powers, eval_all_users=True)
+        total_SINR_per_user = [max(col) for col in zip(*SINR_matrix)]
+
+        RCR = 0
+        for user in self.users:
+            user_covered_flag = False
+            if total_SINR_per_user[user.id] - user.desired_coverage_level > 0 and (self.backhaul_network_available or is_graph_connected):  # lazy evaluation
+                RCR += 1
+                user_covered_flag = True
+            user.set_is_covered(user_covered_flag)
+
+        return RCR / len(self.users)
 
     # ==================================================================================================================
     # Method that SAMPLES new points
@@ -316,7 +327,7 @@ class Control_function:
                                                                             self.channel_gain(agent, user) )
 
             SINR_matrix = self.__SINR(interference_powers_new_position)
-            new_coverage_level = self.__RCR_interference(SINR_matrix)
+            new_coverage_level = self.__RCR(SINR_matrix)
 
             new_expl_level = self.__evaluate_new_exploration(agent)
 
