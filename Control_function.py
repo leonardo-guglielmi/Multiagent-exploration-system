@@ -717,3 +717,9 @@ class Control_function:
     def __sum_triple(t1, t2):
         return t1[0] + t2[0], t1[1] + t2[1], t1[2] + t2[2]
 
+    def __get_num_covered_users(self):
+        num = 0
+        for user in self.users:
+            if user.is_covered:
+                num += 1
+        return num
