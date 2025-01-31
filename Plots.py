@@ -12,7 +12,7 @@ patch_grid = [[]]
 # array of color used in comparison graphics
 colors = ['red', 'darkred', 'gold', 'darkorange', 'limegreen', 'darkgreen', 'cornflowerblue', 'mediumblue', 'mediumorchid', 'rebeccapurple']
 
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, show_plot=False):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=True, show_plot=False):
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -91,14 +91,14 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
         # used for the final coverage image
         if i == 0:
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/initial coverage.png')
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/initial coverage.png')
 
         if i == len(trajectories[0]) - 1:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/final coverage.png')
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/final coverage.png')
 
         return lines
 
@@ -130,32 +130,33 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             xa, ya = trajectory[i]
             agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
-        os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation frames/'), exist_ok=True)
-        plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation frames/frame_{i}.png')
+        os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/'), exist_ok=True)
+        plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/frame_{i}.png')
 
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
     os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
-    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation.mp4', writer='ffmpeg')
+    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
-    ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200, blit=True)
-    ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
+    if use_expl:
+        ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200, blit=True)
+        ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, show_plot=False):
+def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl=True, show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
     plt.ylabel(f'Coverage ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/coverage_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -168,8 +169,8 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.ylabel(f'Exploration ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/exploration_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
