@@ -86,7 +86,7 @@ class Control_function:
     # ==================================================================================================================
 
     # Moves agents in their goal point
-    def __move_agents(self):
+    def move_agents(self):
         for agent in self.agents:
             coupling_deviation = self.__agent_coupling_detection(agent)
             delta_x = agent.goal_point[0] - agent.get_x() + coupling_deviation[0]
