@@ -205,9 +205,6 @@ class Control_function:
         for user in self.users:
             if total_SINR_per_user[user.id] - user.desired_coverage_level > 0 and (self.backhaul_network_available or is_graph_connected): # lazy evaluation
                 RCR += 1
-                user_covered_flag = True
-            if set_flag:
-                user.set_is_covered(user_covered_flag)
 
         return RCR / self.__get_num_covered_users()
 
@@ -687,6 +684,7 @@ class Control_function:
         if self.expl_weight == "constant":
             return EXPLORATION_WEIGHT
 
+        # TODO cambia poi ora che hai la funzione
         # weight that decreases as the number of covered users increases
         elif self.expl_weight == "decrescent":
             num_user_covered = 0
