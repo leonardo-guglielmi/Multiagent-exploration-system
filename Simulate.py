@@ -13,7 +13,7 @@ from Control_function_config_DTO import Control_function_DTO as DTO
 from multiprocessing import Process
 from multiprocessing import Manager
 
-def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
+def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=True):
     # -----------------------------------------------
     #     1° step: simulation's environment creation
     # -----------------------------------------------
@@ -48,24 +48,28 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
               type_of_exploration="LCIENCC",
               expl_weight=expl_weight,
               is_concurrent=True,
-              backhaul_network_available = True)
+              backhaul_network_available = True
+              , use_expl=True)
     cf = Control_function(area, base_stations, agents, users, dto)
 
     # starting points for coverage & exploration levels
     current_reward = cf.RCR_after_move()
     coverage_levels.append(current_reward)
 
-    cf.update_probability_distribution_matrix()
-    current_expl = cf.get_exploration_level()
-    exploration_levels.append(current_expl)
-    prob_matrix_history.append(cf.get_prob_matrix_snapshot())
+    if use_expl:
+        cf.update_probability_distribution_matrix()
+        current_expl = cf.get_exploration_level()
+        exploration_levels.append(current_expl)
+        prob_matrix_history.append(cf.get_prob_matrix_snapshot())
 
     print("Start coverage level: ", current_reward)
     with open("logs/output_log.txt", 'a') as f:
         f.write(f"Start coverage level: {current_reward}\n")
-    print("Start exploration level: ", current_expl)
-    with open("logs/output_log.txt", 'a') as f:
-        f.write(f"Start exploration level: {current_expl}\n")
+
+    if use_expl:
+        print("Start exploration level: ", current_expl)
+        with open("logs/output_log.txt", 'a') as f:
+            f.write(f"Start exploration level: {current_expl}\n")
 
     # -----------------------------------------------
     #     3° step: simulation start
@@ -103,20 +107,20 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
         current_reward = cf.RCR_after_move()
         coverage_levels.append(current_reward)
 
-        cf.update_probability_distribution_matrix()
-        prob_matrix_history.append(cf.get_prob_matrix_snapshot())
+        if use_expl:
+            cf.update_probability_distribution_matrix()
+            prob_matrix_history.append(cf.get_prob_matrix_snapshot())
 
-        current_expl = cf.get_exploration_level()
-        exploration_levels.append(current_expl)
+            current_expl = cf.get_exploration_level()
+            exploration_levels.append(current_expl)
 
         t += 1
         if type_of_search == "mixed" and t == int(NUM_OF_ITERATIONS / 2):
             type_of_search = "systematic mixed"
 
-        print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, " exploration_level: ",
-              current_expl)
+        print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, f" exploration_level: {current_expl}" if use_expl else "")
         with open("logs/output_log.txt", 'a') as f:
-            f.write(f"{type_of_search} iteration: {t} | coverage level: {current_reward} | exploration level: {current_expl}\n")
+            f.write(f"{type_of_search} iteration: {t} | coverage level: {current_reward} | " + f"exploration_level: {current_expl}" if use_expl else "")
 
         # UNCOMMENT THIS FOR DEBUG
         # print(f"is sensor graph connected? {cf.get_agents_graph_connection()}")
@@ -127,19 +131,21 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize):
     # final CLI output
     print("Time elapsed: ", time_elapsed)
     print("Final coverage level: ", current_reward)
-    print("Final exploration level: ", current_expl)
+    if use_expl:
+        print("Final exploration level: ", current_expl)
     if type_of_search == "systematic mixed":
         type_of_search = "mixed"
 
     # saving results with pickle files
     print("Saving simulation data...")
-    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}'), exist_ok=True)
+    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}'), exist_ok=True)
     # noinspection PyTypeChecker
-    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/time_elapsed.p", "wb"))
+    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/time_elapsed.p", "wb"))
     # noinspection PyTypeChecker
-    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/coverages.p', 'wb'))
-    # noinspection PyTypeChecker
-    pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/exploration_levels.p', 'wb'))
+    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/coverages.p', 'wb'))
+    if use_expl:
+        # noinspection PyTypeChecker
+        pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/exploration_levels.p', 'wb'))
 
     # plotting results
     print("Plotting results...")

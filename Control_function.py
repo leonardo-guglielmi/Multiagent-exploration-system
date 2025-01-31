@@ -21,6 +21,7 @@ class Control_function:
         self.type_of_exploration = dto.type_of_exploration
         self.expl_weight = dto.expl_weight
         self.backhaul_network_available = dto.backhaul_network_available
+        self.use_expl = dto.use_expl
 
         # --------------------------------------------------------------------------------------------------------------
         # attributes for network CONNECTIVITY (useful only if backhaul network isn't available)
@@ -329,7 +330,7 @@ class Control_function:
             SINR_matrix = self.__SINR(interference_powers_new_position)
             new_coverage_level = self.__RCR(SINR_matrix)
 
-            new_expl_level = self.__evaluate_new_exploration(agent)
+            new_expl_level = self.__evaluate_new_exploration(agent) if self.use_expl else 0
 
             if self.type_of_search == "penalty":
                 # se il punto è troppo vicino a un punto in cui c'è gia un altro agente -> penalità
