@@ -97,15 +97,15 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
         # used for the final coverage image
-        if i == 0:
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/initial coverage.png')
+        if i == 0 and not use_expl:
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/initial coverage.png')
 
-        if i == len(trajectories[0]) - 1:
+        if i == len(trajectories[0]) - 1 and not use_expl:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/final coverage.png')
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/final coverage.png')
 
         return lines
 
@@ -139,9 +139,20 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         #    agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
         animate(i)
+        # used for the final coverage image
+        if i == 0:
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/initial coverage.png')
 
-        os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/'), exist_ok=True)
-        plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/frame_{i}.png')
+        if i == len(trajectories[0]):
+            for line, trajectory in zip(lines, trajectories):
+                x_coord = [coord[0] for coord in trajectory[:i + 1]]
+                y_coord = [coord[1] for coord in trajectory[:i + 1]]
+                line.set_data(x_coord, y_coord)
+            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/final coverage.png')
+
+        # USE FOR DEBUG
+        #os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation frames/'), exist_ok=True)
+        #plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation frames/frame_{i}.png')
 
         return lines
 
