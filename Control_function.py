@@ -339,6 +339,7 @@ class Control_function:
                         break
 
             i += 1
+            agent.set_2D_position(original_position[0], original_position[1])
 
             reward_under_test = new_coverage_level + self.__exploration_weight() * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward
@@ -349,7 +350,6 @@ class Control_function:
                 best_point = point
                 best_expl_evaluation = new_expl_level
 
-            agent.set_2D_position(original_position[0], original_position[1])
         if print_expl_eval:
             # output for DEBUG
             print(f"DEBUG: Agent {agent.id} best exploration evaluation {best_expl_evaluation}")
