@@ -163,7 +163,7 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.close()
 
 
-def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, show_plot=False):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs=True, show_plot=False):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
