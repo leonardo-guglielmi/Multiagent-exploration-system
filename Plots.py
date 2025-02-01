@@ -56,14 +56,19 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         if use_expl:
             matrix = prob_matrix_history[0]
             patch_grid = [[Rectangle((j * EXPLORATION_CELL_WIDTH, k * EXPLORATION_CELL_HEIGTH),
-                                 EXPLORATION_CELL_WIDTH, EXPLORATION_CELL_HEIGTH, color="#ff9900",
-                                 alpha=0, zorder=1)
+                                 EXPLORATION_CELL_WIDTH, EXPLORATION_CELL_HEIGTH,
+                                facecolor="#ff9900", edgecolor='#ff8000', alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
 
             for j in range(matrix.shape[0]):
                 for k in range(matrix.shape[1]):
                     ax.add_patch(patch_grid[j][k])
+
+            for i in range(20):
+                ax.add_patch(Rectangle((1050, 1000-41*(i+1)), 40, 40, facecolor="#ff9900", edgecolor='#ff8000', alpha=i*0.05, zorder=1, clip_on=False))
+                plt.text(1100, 1000-41*(i+1),f"prob. {round(i*0.05, 2)}", size='x-small', fontfamily='monospace')
+            ax.add_patch(Rectangle((1050, 1000-41), 40, 40, facecolor="#ffffff", edgecolor='#ff8000', alpha=0.1, zorder=1, clip_on=False))
 
         return lines
 
