@@ -187,5 +187,45 @@ def main():
             f.write(str(e))
         raise e
 
+def main2():
+
+    try:
+        types_of_search = ["local"]
+        expl_weights = ["constant"]
+
+        print(f"Simulations begin: {date.now()}\n")
+        with open("logs/output_log.txt", 'w') as f:
+            f.write(f"Simulations begin: {date.now()}\n")
+
+        for i in range(NUM_OF_SIMULATIONS):
+            deserialize = False
+            for type_of_search in types_of_search:
+                for expl_weight in expl_weights:
+                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----')
+                    with open("logs/output_log.txt", 'a') as f:
+                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----\n')
+                    simulate(type_of_search, expl_weight, i, deserialize)
+                    Sensor.id = 0
+                    User.id = 0
+                    deserialize=True
+
+                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----')
+                    with open("logs/output_log.txt", 'a') as f:
+                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----\n')
+                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=False)
+                    Sensor.id = 0
+                    User.id = 0
+
+        print(f"Simulations completed {date.now()}")
+        with open("logs/output_log.txt", 'a') as f:
+            f.write(f"Simulations completed {date.now()}\n")
+
+    except Exception as e:
+        with open("logs/error_log.txt", "w") as f:
+            f.write(str(e))
+        with open("logs/output_log.txt", 'a') as f:
+            f.write(str(e))
+        raise e
+
 if __name__ == '__main__':
     main()
