@@ -110,15 +110,6 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     def animate_prob(i):
-        #global user_scatter
-        #for scatter in user_scatter[:]:
-        #    scatter.remove()
-        #    user_scatter.remove(scatter)
-
-        #global agent_scatter
-        #for scatter in agent_scatter[:]:
-        #    scatter.remove()
-        #    agent_scatter.remove(scatter)
 
         if use_expl:
             matrix = prob_matrix_history[i]
@@ -126,17 +117,6 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
             for j in range(matrix.shape[0]):
                 for k in range(matrix.shape[1]):
                     patch_grid[j][k].set_alpha(matrix[j][k])
-
-        #colors = ['green' if user.coverage_history[i] else 'red' for user in users]
-        #markers = ['^' if user.coverage_history[i] else 'x' for user in users]
-        # draw users' markers
-        #for xu, yu, color, marker in zip(users_x, users_y, colors, markers):
-        #    user_scatter.append(plt.scatter(xu, yu, color=color, marker=marker, zorder=2))
-
-        # draw users' trajectory
-        #for agent, trajectory in zip(agents, trajectories):
-        #    xa, ya = trajectory[i]
-        #    agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
 
         animate(i)
         # used for the final coverage image
