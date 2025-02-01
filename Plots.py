@@ -12,7 +12,7 @@ patch_grid = [[]]
 # array of color used in comparison graphics
 colors = ['red', 'darkred', 'gold', 'darkorange', 'limegreen', 'darkgreen', 'cornflowerblue', 'mediumblue', 'mediumorchid', 'rebeccapurple']
 
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=True, show_plot=False):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=True, use_bs=True, show_plot=False):
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -34,8 +34,9 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     # extract and display first elements
     users_x, users_y = zip(*[user.get_position() for user in users])
 
-    base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
-    plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
+    if use_bs:
+        base_stations_x, base_stations_y = zip(*[base_station.get_2D_position() for base_station in base_stations])
+        plt.scatter(base_stations_x, base_stations_y, color='blue', zorder=2)
 
     trajectories = [agent.trajectory for agent in agents]
     lines = [ax.plot([], [], lw=0.7)[0] for _ in trajectories]

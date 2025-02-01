@@ -204,7 +204,7 @@ def main2():
                     print(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----')
                     with open("logs/output_log.txt", 'a') as f:
                         f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----\n')
-                    simulate(type_of_search, expl_weight, i, deserialize)
+                    simulate(type_of_search, expl_weight, i, deserialize, use_bs=False)
                     Sensor.id = 0
                     User.id = 0
                     deserialize=True
@@ -212,7 +212,7 @@ def main2():
                     print(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----')
                     with open("logs/output_log.txt", 'a') as f:
                         f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----\n')
-                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=False)
+                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=False, use_bs=False)
                     Sensor.id = 0
                     User.id = 0
 

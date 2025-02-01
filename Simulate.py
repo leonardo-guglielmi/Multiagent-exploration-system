@@ -13,7 +13,7 @@ from Control_function_config_DTO import Control_function_DTO as DTO
 from multiprocessing import Process
 from multiprocessing import Manager
 
-def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=True):
+def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=True, use_bs=True):
     # -----------------------------------------------
     #     1° step: simulation's environment creation
     # -----------------------------------------------
@@ -24,12 +24,13 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
         Agent(area, COMMUNICATION_RADIUS, TRANSMITTING_POWER, ALTITUDE + i * SENSOR_HEIGHT + MIN_VERTICAL_DISTANCE,
               deserialize) for i in range(N)]
 
-    # by default a base station does not interfere with the communication of the other agents
-    b1 = Base_station(area, COMMUNICATION_RADIUS, 1 / 4 * area.width, 1 / 4 * area.length, TRANSMITTING_POWER)
-    b2 = Base_station(area, COMMUNICATION_RADIUS, 1 / 4 * area.width, 3 / 4 * area.length, TRANSMITTING_POWER)
-    b3 = Base_station(area, COMMUNICATION_RADIUS, 3 / 4 * area.width, 1 / 4 * area.length, TRANSMITTING_POWER)
-    b4 = Base_station(area, COMMUNICATION_RADIUS, 3 / 4 * area.width, 3 / 4 * area.length, TRANSMITTING_POWER)
-    base_stations = [b1, b2, b3, b4]
+    base_stations = []
+    if use_bs:
+        b1 = Base_station(area, COMMUNICATION_RADIUS, 1 / 4 * area.width, 1 / 4 * area.length, TRANSMITTING_POWER)
+        b2 = Base_station(area, COMMUNICATION_RADIUS, 1 / 4 * area.width, 3 / 4 * area.length, TRANSMITTING_POWER)
+        b3 = Base_station(area, COMMUNICATION_RADIUS, 3 / 4 * area.width, 1 / 4 * area.length, TRANSMITTING_POWER)
+        b4 = Base_station(area, COMMUNICATION_RADIUS, 3 / 4 * area.width, 3 / 4 * area.length, TRANSMITTING_POWER)
+        base_stations = [b1, b2, b3, b4]
 
     users = [User(area, DESIRED_COVERAGE_LEVEL, deserialize) for _ in range(M)]
 
@@ -120,7 +121,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
 
         print(type_of_search, "iteration: ", t, " coverage level: ", current_reward, f" exploration_level: {current_expl}" if use_expl else "")
         with open("logs/output_log.txt", 'a') as f:
-            f.write(f"{type_of_search} iteration: {t} | coverage level: {current_reward} | " + f"exploration_level: {current_expl}" if use_expl else "")
+            f.write(f"\n{type_of_search} iteration: {t} | coverage level: {current_reward} | " + f"exploration_level: {current_expl}\n" if use_expl else "\n")
 
         # UNCOMMENT THIS FOR DEBUG
         # print(f"is sensor graph connected? {cf.get_agents_graph_connection()}")
@@ -149,7 +150,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
 
     # plotting results
     print("Plotting results...")
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=use_expl)
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=use_expl, use_bs=use_bs)
     plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl=use_expl)
     if use_expl:
         plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
