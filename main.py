@@ -187,7 +187,7 @@ def main():
             f.write(str(e))
         raise e
 
-def main2():
+def experiment2():
 
     try:
         types_of_search = ["local"]
@@ -201,20 +201,15 @@ def main2():
             deserialize = False
             for type_of_search in types_of_search:
                 for expl_weight in expl_weights:
-                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----')
-                    with open("logs/output_log.txt", 'a') as f:
-                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-expl] : {i} @ {date.now()}-----\n')
-                    simulate(type_of_search, expl_weight, i, deserialize, use_bs=False)
-                    Sensor.id = 0
-                    User.id = 0
-                    deserialize=True
-
-                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----')
-                    with open("logs/output_log.txt", 'a') as f:
-                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----\n')
-                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=False, use_bs=False)
-                    Sensor.id = 0
-                    User.id = 0
+                    for expl  in [True, False]:
+                        for BS in [True, False]:
+                            print(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----')
+                            with open("logs/output_log.txt", 'a') as f:
+                                f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}-no expl] : {i} @ {date.now()}-----\n')
+                            simulate(type_of_search, expl_weight, i, deserialize, use_expl=expl, use_bs=BS)
+                            Sensor.id = 0
+                            User.id = 0
+                            deserialize = True
 
         print(f"Simulations completed {date.now()}")
         with open("logs/output_log.txt", 'a') as f:
@@ -228,4 +223,4 @@ def main2():
         raise e
 
 if __name__ == '__main__':
-    main2()
+    experiment2()
