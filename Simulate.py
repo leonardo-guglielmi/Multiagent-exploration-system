@@ -57,7 +57,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
     coverage_levels.append(current_reward)
 
     if use_expl:
-        cf.update_probability_distribution_matrix()
+        cf.update_probability_distribution_matrix(init=True)
         current_expl = cf.get_exploration_level()
         exploration_levels.append(current_expl)
         prob_matrix_history.append(cf.get_prob_matrix_snapshot())
@@ -149,7 +149,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
 
     # plotting results
     print("Plotting results...")
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight)
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=use_expl)
     plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
     plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter)
 

@@ -52,16 +52,17 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
         global patch_grid
         # first index is for x-axis, second index for y-axis
-        matrix = prob_matrix_history[0]
-        patch_grid = [[Rectangle((j * EXPLORATION_CELL_WIDTH, k * EXPLORATION_CELL_HEIGTH),
+        if use_expl:
+            matrix = prob_matrix_history[0]
+            patch_grid = [[Rectangle((j * EXPLORATION_CELL_WIDTH, k * EXPLORATION_CELL_HEIGTH),
                                  EXPLORATION_CELL_WIDTH, EXPLORATION_CELL_HEIGTH, color="#ff9900",
                                  alpha=0, zorder=1)
                        for k in range(matrix.shape[1])]
                       for j in range(matrix.shape[0])]
 
-        for j in range(matrix.shape[0]):
-            for k in range(matrix.shape[1]):
-                ax.add_patch(patch_grid[j][k])
+            for j in range(matrix.shape[0]):
+                for k in range(matrix.shape[1]):
+                    ax.add_patch(patch_grid[j][k])
 
         return lines
 
@@ -103,32 +104,35 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     def animate_prob(i):
-        global user_scatter
-        for scatter in user_scatter[:]:
-            scatter.remove()
-            user_scatter.remove(scatter)
+        #global user_scatter
+        #for scatter in user_scatter[:]:
+        #    scatter.remove()
+        #    user_scatter.remove(scatter)
 
-        global agent_scatter
-        for scatter in agent_scatter[:]:
-            scatter.remove()
-            agent_scatter.remove(scatter)
+        #global agent_scatter
+        #for scatter in agent_scatter[:]:
+        #    scatter.remove()
+        #    agent_scatter.remove(scatter)
 
-        matrix = prob_matrix_history[i]
-        global patch_grid
-        for j in range(matrix.shape[0]):
-            for k in range(matrix.shape[1]):
-                patch_grid[j][k].set_alpha(matrix[j][k])
+        if use_expl:
+            matrix = prob_matrix_history[i]
+            global patch_grid
+            for j in range(matrix.shape[0]):
+                for k in range(matrix.shape[1]):
+                    patch_grid[j][k].set_alpha(matrix[j][k])
 
-        colors = ['green' if user.coverage_history[i] else 'red' for user in users]
-        markers = ['^' if user.coverage_history[i] else 'x' for user in users]
+        #colors = ['green' if user.coverage_history[i] else 'red' for user in users]
+        #markers = ['^' if user.coverage_history[i] else 'x' for user in users]
         # draw users' markers
-        for xu, yu, color, marker in zip(users_x, users_y, colors, markers):
-            user_scatter.append(plt.scatter(xu, yu, color=color, marker=marker, zorder=2))
+        #for xu, yu, color, marker in zip(users_x, users_y, colors, markers):
+        #    user_scatter.append(plt.scatter(xu, yu, color=color, marker=marker, zorder=2))
 
         # draw users' trajectory
-        for agent, trajectory in zip(agents, trajectories):
-            xa, ya = trajectory[i]
-            agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
+        #for agent, trajectory in zip(agents, trajectories):
+        #    xa, ya = trajectory[i]
+        #    agent_scatter.append(plt.scatter(xa, ya, color='black', zorder=2))
+
+        animate(i)
 
         os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/'), exist_ok=True)
         plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation frames/frame_{i}.png')
