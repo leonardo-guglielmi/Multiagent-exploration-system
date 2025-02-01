@@ -139,14 +139,14 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl=Tru
 
     # saving results with pickle files
     print("Saving simulation data...")
-    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}'), exist_ok=True)
+    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}'), exist_ok=True)
     # noinspection PyTypeChecker
-    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/time_elapsed.p", "wb"))
+    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/time_elapsed.p", "wb"))
     # noinspection PyTypeChecker
-    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/coverages.p', 'wb'))
+    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/coverages.p', 'wb'))
     if use_expl:
         # noinspection PyTypeChecker
-        pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/exploration_levels.p', 'wb'))
+        pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/exploration_levels.p', 'wb'))
 
     # plotting results
     print("Plotting results...")
