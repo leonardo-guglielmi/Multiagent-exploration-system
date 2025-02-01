@@ -138,26 +138,26 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
     os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
-    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation.mp4', writer='ffmpeg')
+    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
     if use_expl:
         ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200, blit=True)
-        ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
+        ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl=True, show_plot=False):
+def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl=True, use_bs=True,show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
     plt.ylabel(f'Coverage ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/{num_of_iter}/coverage_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -170,8 +170,8 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.ylabel(f'Exploration ({type_of_search}, {expl_weight})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/{num_of_iter}/exploration_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/BS {use_bs}/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/BS {use_bs}/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
