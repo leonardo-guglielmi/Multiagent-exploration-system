@@ -81,7 +81,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl, us
 
     # control function continue to iterate until all users are cover or reach the limit of iterations (NUM_OF_ITERATIONS)
     t = 0  # iter counter (it's the time variable in the mathematical model)
-    while current_reward != 1.0 and t < NUM_OF_ITERATIONS:
+    while t < NUM_OF_ITERATIONS:
 
         if dto.is_concurrent:
             with Manager() as manager:
