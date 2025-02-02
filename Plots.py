@@ -12,7 +12,7 @@ patch_grid = [[]]
 # array of color used in comparison graphics
 colors = ['red', 'darkred', 'gold', 'darkorange', 'limegreen', 'darkgreen', 'cornflowerblue', 'mediumblue', 'mediumorchid', 'rebeccapurple']
 
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=True, use_bs=True, show_plot=False):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl, use_bs, show_plot=False):
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -149,7 +149,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
     plt.close()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl=True, use_bs=True,show_plot=False):
+def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl, use_bs,show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
@@ -163,7 +163,7 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.close()
 
 
-def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs=True, show_plot=False):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs, show_plot=False):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
