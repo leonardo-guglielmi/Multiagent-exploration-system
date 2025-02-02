@@ -1,1 +1,1 @@
-'float' object is not subscriptable
+Rectangle.__init__() missing 1 required positional argument: 'height'
