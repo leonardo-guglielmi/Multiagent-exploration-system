@@ -68,7 +68,7 @@ for expl in [True, False]:
 min_starting_cov = min(min_starting_coverages)
 
 # plot coverage comparison
-fig, ax = plt.subplots(1,2, figsize=(12,5), constrained_layout=True)
+fig, ax = plt.subplots(1, 2, figsize=(10,5), constrained_layout=True)
 ax[0].set_xlabel("Iteration")
 ax[0].set_ylabel("Coverage")
 ax[0].set_ylim(min_starting_cov,1)
