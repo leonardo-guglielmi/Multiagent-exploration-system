@@ -156,8 +156,8 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -170,8 +170,8 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
