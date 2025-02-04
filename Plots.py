@@ -123,7 +123,7 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         if i == 0:
             plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/initial coverage.png')
 
-        if i == len(trajectories[0]):
+        if i == len(trajectories[0]) -1:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
