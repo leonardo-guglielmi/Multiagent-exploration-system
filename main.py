@@ -239,7 +239,7 @@ def experiment2():
                     with open("logs/output_log.txt", 'a') as f:
                         f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} @ {date.now()}-----\n')
 
-                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=True, use_bs=False)
+                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=True, use_bs=True)
                     Sensor.id = 0
                     User.id = 0
                     deserialize = True
