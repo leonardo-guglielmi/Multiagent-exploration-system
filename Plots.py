@@ -10,7 +10,7 @@ agent_scatter = []
 patch_grid = [[]]
 
 # array of color used in comparison graphics
-colors = ['red', 'darkred', 'gold', 'darkorange', 'limegreen', 'darkgreen', 'cornflowerblue', 'mediumblue', 'mediumorchid', 'rebeccapurple']
+colors = ['red', 'darkorange', 'limegreen', 'cornflowerblue', 'mediumorchid']
 
 def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl, use_bs, show_plot=False):
     fig, ax = plt.subplots()
@@ -153,11 +153,11 @@ def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_i
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
-    plt.ylabel(f'Coverage ({type_of_search}, {expl_weight})')
+    plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/coverage_graphic.png')
+    os.makedirs(os.path.dirname(f'Experiment result/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Experiment result/experiment2/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
@@ -167,64 +167,40 @@ def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weig
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
-    plt.ylabel(f'Exploration ({type_of_search}, {expl_weight})')
+    plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/BS {use_bs}/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl True/BS {use_bs}/{num_of_iter}/exploration_graphic.png')
+    os.makedirs(os.path.dirname(f'Experiment result/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Experiment result/experiment2/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverages_comparison(coverages, show_plot=False):
+def plot_coverages_comparison(coverages, legend, show_plot=False):
     plt.subplots()
     j = 0 # index to iter through colors
-    for coverage_list in coverages:
-        for coverage in coverage_list:
-            plt.plot(range(len(coverage)), coverage, color=colors[j])
-            j += 1
-    plt.legend(["Systematic search, constant weight"
-                   , "Systematic search, decrescent weight"
-                   , "Local search, constant weight"
-                   , "Local search, decrescent weight"
-                   , "Annealing forward search, constant weight"
-                   , "Annealing forward search, decrescent weight"
-                   , "Annealing reverse search, constant weight"
-                   , "Annealing reverse search, decrescent weight"
-                   , "Penalty search, constant weight"
-                   , "Penalty search, decrescent weight"]
-               , bbox_to_anchor=(1, 1)
-               , loc='upper left')
+    for coverage in coverages:
+        plt.plot(range(len(coverage)), coverage, color=colors[j], label=legend[j], linewidth=2)
+        j += 1
+    plt.legend()
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
-    plt.savefig(f'Simulations output/coverages_graphic_comparison.png', bbox_inches='tight')
+    plt.savefig(f'Experiment results/experiment2/coverages_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
 
-def plot_exploration_comparison(expl_levels, show_plot=False):
+def plot_exploration_comparison(expl_levels, legend, show_plot=False):
     plt.subplots()
     j = 0 # index to iter through colors
-    for expl_list in expl_levels:
-        for expl in expl_list:
-            plt.plot(range(len(expl)), expl, color=colors[j])
-            j += 1
-    plt.legend(["Systematic search, constant weight"
-                   , "Systematic search, decrescent weight"
-                   , "Local search, constant weight"
-                   , "Local search, decrescent weight"
-                   , "Annealing forward search, constant weight"
-                   , "Annealing forward search, decrescent weight"
-                   , "Annealing reverse search, constant weight"
-                   , "Annealing reverse search, decrescent weight"
-                   , "Penalty search, constant weight"
-                   , "Penalty search, decrescent weight"]
-               , bbox_to_anchor=(1, 1)
-               , loc='upper left')
+    for expl in expl_levels:
+        plt.plot(range(len(expl)), expl, color=colors[j], label=legend[j], linewidth=2)
+        j += 1
+    plt.legend()
     plt.xlabel('Iterations')
     plt.ylabel('Exploration')
-    plt.savefig(f'Simulations output/exploration_graphic_comparison.png', bbox_inches='tight')
+    plt.savefig(f'Experiment results/experiment2/exploration_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
