@@ -34,10 +34,10 @@ for expl in [True, False]:
             f.write(output)
         if expl:
             with (open(f"Experiment results/experiment1/expl {expl}/BS {bs}/final_exploration_statistics.txt", 'w') as f):
-                output = f"max: {max(final_cov[expl][bs])} " + \
-                         f"min: {min(final_cov[expl][bs])} " + \
-                         f"avg: {statistics.mean(final_cov[expl][bs])} " + \
-                         f"std_dev: {statistics.stdev(final_cov[expl][bs])}"
+                output = f"max: {max(final_expl[bs])} " + \
+                         f"min: {min(final_expl[bs])} " + \
+                         f"avg: {statistics.mean(final_expl[bs])} " + \
+                         f"std_dev: {statistics.stdev(final_expl[bs])}"
                 f.write(output)
 
 # get overhaul statistics
