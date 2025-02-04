@@ -12,7 +12,7 @@ for expl in [True, False]:
         for i in range(NUM_OF_SIMULATIONS):
             coverages[expl][bs].append(pickle.load(open(f"Experiment results/experiment1/expl {expl}/BS {bs}/{i}/coverages.p", 'rb')))
             if expl:
-                explorations[bs].append(pickle.load(open(f"Experiment results/experiment1/expl {expl}/BS {bs}/{i}/coverages.p", 'rb')))
+                explorations[bs].append(pickle.load(open(f"Experiment results/experiment1/expl {expl}/BS {bs}/{i}/exploration_levels.p", 'rb')))
 
 # get final statistics
 final_cov = {True: {True: [0 for _ in range(NUM_OF_SIMULATIONS)], False: [0 for _ in range(NUM_OF_SIMULATIONS)]}
