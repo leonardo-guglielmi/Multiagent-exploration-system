@@ -10,9 +10,15 @@ agent_scatter = []
 patch_grid = [[]]
 
 # array of color used in comparison graphics
-colors = ['red', 'darkorange', 'limegreen', 'cornflowerblue', 'mediumorchid']
+colors = [
+    #'red'
+    'darkorange'
+    , 'limegreen'
+    #, 'cornflowerblue'
+    #, 'mediumorchid'
+          ]
 
-def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl, use_bs, show_plot=False):
+def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl, use_bs, use_custom_prob, show_plot=False):
     fig, ax = plt.subplots()
     plt.axis('square')
     plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.8)
@@ -98,14 +104,14 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
 
         # used for the final coverage image
         if i == 0 and not use_expl:
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/initial coverage.png')
+            plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/initial coverage.png')
 
         if i == len(trajectories[0]) - 1 and not use_expl:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/final coverage.png')
+            plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/final coverage.png')
 
         return lines
 
@@ -121,14 +127,14 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         animate(i)
         # used for the final coverage image
         if i == 0:
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/initial coverage.png')
+            plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/initial coverage.png')
 
         if i == len(trajectories[0]) -1:
             for line, trajectory in zip(lines, trajectories):
                 x_coord = [coord[0] for coord in trajectory[:i + 1]]
                 y_coord = [coord[1] for coord in trajectory[:i + 1]]
                 line.set_data(x_coord, y_coord)
-            plt.savefig(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/final coverage.png')
+            plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/final coverage.png')
 
         # USE FOR DEBUG
         #os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation frames/'), exist_ok=True)
@@ -137,47 +143,47 @@ def plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, p
         return lines
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=len(trajectories[0]), interval=200, blit=True)
-    os.makedirs(os.path.dirname(f'Simulations output/{type_of_search} search/{expl_weight} weight/{num_of_iter}/'), exist_ok=True)
-    ani.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation.mp4', writer='ffmpeg')
+    os.makedirs(os.path.dirname(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}'), exist_ok=True)
+    ani.save(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/animation.mp4', writer='ffmpeg')
 
     if use_expl:
         ani_prob = animation.FuncAnimation(fig, animate_prob, init_func=init_prob, frames=len(trajectories[0]), interval=200, blit=True)
-        ani_prob.save(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
+        ani_prob.save(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/animation_prob.mp4', writer='ffmpeg')
 
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl, use_bs,show_plot=False):
+def plot_coverage(coverages, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl, use_bs, use_custom_prob, show_plot=False):
     plt.subplots()
     plt.plot(range(len(coverages)), coverages)
     plt.xlabel('Iterations')
     plt.ylabel(f'Coverage ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/coverage_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/coverage_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs, show_plot=False):
+def plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs, use_custom_prob, show_plot=False):
     plt.subplots()
     plt.plot(range(len(exploration_levels)), exploration_levels)
     plt.xlabel('Iterations')
     plt.ylabel(f'Exploration ({type_of_search})')
     plt.text(1.1, 1.1, f'Time elapsed: {time_elapsed}', horizontalalignment='right', verticalalignment='top',
              transform=plt.gca().transAxes)
-    os.makedirs(os.path.dirname(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/'), exist_ok=True)
-    plt.savefig(f'Experiment results/experiment2/{type_of_search} search/{num_of_iter}/exploration_graphic.png')
+    os.makedirs(os.path.dirname(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/'), exist_ok=True)
+    plt.savefig(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/exploration_graphic.png')
     if show_plot:
         plt.show()
     plt.close()
 
 
-def plot_coverages_comparison(coverages, legend, show_plot=False):
+def plot_coverages_comparison(coverages, legend, show_plot=False, path=None):
     plt.subplots()
     j = 0 # index to iter through colors
     for coverage in coverages:
@@ -186,12 +192,15 @@ def plot_coverages_comparison(coverages, legend, show_plot=False):
     plt.legend()
     plt.xlabel('Iterations')
     plt.ylabel('Coverage')
-    plt.savefig(f'Experiment results/experiment2/coverages_graphic_comparison.png', bbox_inches='tight')
+    if path is None:
+        plt.savefig(f'coverages_graphic_comparison.png', bbox_inches='tight')
+    else:
+        plt.savefig(f'{path}/coverages_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
 
-def plot_exploration_comparison(expl_levels, legend, show_plot=False):
+def plot_exploration_comparison(expl_levels, legend, show_plot=False, path=None):
     plt.subplots()
     j = 0 # index to iter through colors
     for expl in expl_levels:
@@ -200,74 +209,10 @@ def plot_exploration_comparison(expl_levels, legend, show_plot=False):
     plt.legend()
     plt.xlabel('Iterations')
     plt.ylabel('Exploration')
-    plt.savefig(f'Experiment results/experiment2/exploration_graphic_comparison.png', bbox_inches='tight')
-    if show_plot:
-        plt.show()
-    plt.close()
-
-def plot_coverage_weight_coverage_comparison(coverages_avg, type_of_search, show_plot=False):
-    plt.subplots()
-    for cov_avg in coverages_avg:
-        plt.plot(range(len(cov_avg)), cov_avg)
-    plt.legend(["constant" , "decrescent"])
-    plt.xlabel('Iterations')
-    plt.ylabel(f'Coverage, {type_of_search}')
-    plt.savefig(f"Simulations output/{type_of_search}/coverage_weight_comparison.png")
-    if show_plot:
-        plt.show()
-    plt.close()
-
-def plot_exploration_weight_coverage_comparison(explorations_avg, type_of_search, show_plot=False):
-    plt.subplots()
-    for expl_avg in explorations_avg:
-        plt.plot(range(len(expl_avg)), expl_avg)
-    plt.legend(["constant" , "decrescent"])
-    plt.xlabel('Iterations')
-    plt.ylabel(f'Exploration, {type_of_search}')
-    plt.savefig(f"Simulations output/{type_of_search}/exploration_weight_comparison.png")
-    if show_plot:
-        plt.show()
-    plt.close()
-
-def plot_statistics_comparison(data_type, data_statistic, show_plot=False):
-    plt.subplots()
-
-    types_of_search = ["systematic", "local", "annealing forward", "annealing reverse", "penalty"]
-    expl_weights = ["constant", "decrescent"]
-
-    datas = []
-    data_deviations = []
-
-    for search in types_of_search:
-        for weight in expl_weights:
-            with open(f"Simulations output/{search} search/{weight} weight/{data_statistic}_{data_type}.txt", "r") as f:
-                datas.append(float(f.read()))
-                if data_statistic == "mean":
-                    with open(f"Simulations output/{search} search/{weight} weight/std_dev_{data_type}.txt", "r") as f:
-                        data_deviations.append(float(f.read()))
-    for i in range(len(datas)):
-        if data_statistic != "mean":
-            plt.bar(i, datas[i], width=0.8, color=colors[i])
-        else:
-            plt.bar(i, datas[i], width=0.8, color=colors[i], yerr=data_deviations[i])
-
-    plt.title(f"{data_statistic} {data_type} comparison")
-    plt.ylabel(f"{data_type}")
-    plt.legend(["Systematic search, constant weight"
-                , "Systematic search, decrescent weight"
-                , "Local search, constant weight"
-                , "Local search, decrescent weight"
-                , "Annealing forward search, constant weight"
-                , "Annealing forward search, decrescent weight"
-                , "Annealing reverse search, constant weight"
-                , "Annealing reverse search, decrescent weight"
-                , "Penalty search, constant weight"
-                , "Penalty search, decrescent weight"]
-                , bbox_to_anchor = (1, 1)
-                , loc = 'upper left')
-    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-
-    plt.savefig(f"Simulations output/{data_statistic}_{data_type}_comparison.png", bbox_inches='tight')
+    if path is None:
+        plt.savefig(f'exploration_graphic_comparison.png', bbox_inches='tight')
+    else:
+        plt.savefig(f'{path}/exploration_graphic_comparison.png', bbox_inches='tight')
     if show_plot:
         plt.show()
     plt.close()
