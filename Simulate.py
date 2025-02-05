@@ -13,7 +13,7 @@ from Control_function_config_DTO import Control_function_DTO as DTO
 from multiprocessing import Process
 from multiprocessing import Manager
 
-def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl, use_bs):
+def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl, use_bs, use_custom_prob=False):
     # -----------------------------------------------
     #     1° step: simulation's environment creation
     # -----------------------------------------------
@@ -51,6 +51,7 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl, us
               is_concurrent=True,
               backhaul_network_available = True
               , use_expl=use_expl
+              , use_custom_prob=use_custom_prob
     )
     cf = Control_function(area, base_stations, agents, users, dto)
 
@@ -140,21 +141,21 @@ def simulate(type_of_search, expl_weight, num_of_iter, deserialize, use_expl, us
 
     # saving results with pickle files
     print("Saving simulation data...")
-    os.makedirs(os.path.normpath(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}'), exist_ok=True)
+    os.makedirs(os.path.normpath(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}'), exist_ok=True)
     # noinspection PyTypeChecker
-    pickle.dump(time_elapsed, open(f"Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/time_elapsed.p", "wb"))
+    pickle.dump(time_elapsed, open(f"Simulations output/custom prob {use_custom_prob}/{num_of_iter}/time_elapsed.p", "wb"))
     # noinspection PyTypeChecker
-    pickle.dump(coverage_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/coverages.p', 'wb'))
+    pickle.dump(coverage_levels, open(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/coverages.p', 'wb'))
     if use_expl:
         # noinspection PyTypeChecker
-        pickle.dump(exploration_levels, open(f'Simulations output/{type_of_search} search/{expl_weight} weight/expl {use_expl}/BS {use_bs}/{num_of_iter}/exploration_levels.p', 'wb'))
+        pickle.dump(exploration_levels, open(f'Simulations output/custom prob {use_custom_prob}/{num_of_iter}/exploration_levels.p', 'wb'))
 
     # plotting results
     print("Plotting results...")
-    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=use_expl, use_bs=use_bs)
-    plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl, use_bs)
+    plot_area(area, users, base_stations, agents, type_of_search, num_of_iter, prob_matrix_history, expl_weight, use_expl=use_expl, use_bs=use_bs, use_custom_prob=use_custom_prob)
+    plot_coverage(coverage_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_expl, use_bs, use_custom_prob)
     if use_expl:
-        plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs)
+        plot_exploration(exploration_levels, time_elapsed, type_of_search, expl_weight, num_of_iter, use_bs, use_custom_prob)
 
 
 def concurrent_find_goal_point(cf, agent, t, output_dict):

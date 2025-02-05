@@ -74,21 +74,17 @@ def experiment2():
 
 def experiment3():
     try:
-        types_of_search = ["local"]
-        expl_weights = ["constant", "decrescent"]
-
         for i in range(NUM_OF_SIMULATIONS):
             deserialize = False
-            for type_of_search in types_of_search:
-                for expl_weight in expl_weights:
-                    print(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} @ {date.now()}-----')
-                    with open("logs/output_log.txt", 'a') as f:
-                        f.write(f'----- Starting simulation [{type_of_search}-{expl_weight}] : {i} @ {date.now()}-----\n')
+            for prob in [True, False]:
+                print(f'----- Starting simulation [local-constant-custom prob {prob}] : {i} @ {date.now()}-----')
+                with open("logs/output_log.txt", 'a') as f:
+                    f.write(f'----- Starting simulation [local-constant-custom prob {prob}] : {i} @ {date.now()}-----\n')
 
-                    simulate(type_of_search, expl_weight, i, deserialize, use_expl=True, use_bs=True)
-                    Sensor.id = 0
-                    User.id = 0
-                    deserialize = True
+                simulate("local", "constant", i, deserialize, use_expl=True, use_bs=True, use_custom_prob=prob)
+                Sensor.id = 0
+                User.id = 0
+                deserialize = True
         print("Simulations completed")
         with open("logs/output_log.txt", 'a') as f:
             f.write("Simulations completed\n")
