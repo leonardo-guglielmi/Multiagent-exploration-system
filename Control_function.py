@@ -5,6 +5,7 @@ from Constants import *
 import scipy
 from Sensor import Base_station, Agent
 from User import *
+import json
 
 class Control_function:
     def __init__(self, area, base_stations, agents, users, dto):
@@ -22,6 +23,11 @@ class Control_function:
         self.expl_weight = dto.expl_weight
         self.backhaul_network_available = dto.backhaul_network_available
         self.use_expl = dto.use_expl
+
+        self.use_custom_prob = dto.use_custom_prob
+        if dto.use_custom_prob:
+            with open('custom_probs.json', 'r') as f:
+                self.custom_prob = json.load(f)
 
         # --------------------------------------------------------------------------------------------------------------
         # attributes for network CONNECTIVITY (useful only if backhaul network isn't available)
@@ -703,9 +709,10 @@ class Control_function:
                     matrix[i, j] = 0
                 elif init:
                     matrix[i, j] = INIT_PROBABLITY
+                elif self.use_custom_prob:
+                    matrix[i, j] =(1 - matrix[i, j]) * self.custom_prob['Pn'] + matrix[i, j] * (1 - self.custom_prob['Pd'])
                 else:
-                    matrix[i, j] =(1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY \
-                            + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
+                    matrix[i, j] = (1 - matrix[i, j]) * USER_APPEARANCE_PROBABILITY + matrix[i, j] * (1 - USER_DISCONNECTION_PROBABILITY)
 
         for user in self.users:
             if len(user.coverage_history) >= 2 \
