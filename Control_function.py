@@ -347,7 +347,7 @@ class Control_function:
             i += 1
             agent.set_2D_position(original_position[0], original_position[1])
 
-            reward_under_test = new_coverage_level + self.__exploration_weight() * new_expl_level
+            reward_under_test = new_coverage_level + EXPLORATION_WEIGHT * new_expl_level
             if reward_under_test > best_reward or (reward_under_test == best_reward
                                                    and math.dist(agent.get_2D_position(), point) >
                                                    math.dist(agent.get_2D_position(), best_point)
@@ -684,14 +684,13 @@ class Control_function:
 
         return exploration_level
 
-    # Returns the exploration weight in objective function
+    # Returns the exploration weight in objective function (NO NEEDED ANYMORE)
     def __exploration_weight(self):
         # constant weight
         if self.expl_weight == "constant":
             return EXPLORATION_WEIGHT
 
-        # TODO cambia poi ora che hai la funzione
-        # weight that decreases as the number of covered users increases
+        # weight that decreases as the number of covered users increases (NOT USED)
         elif self.expl_weight == "decrescent":
             num_user_covered = 0
             for user in self.users:
