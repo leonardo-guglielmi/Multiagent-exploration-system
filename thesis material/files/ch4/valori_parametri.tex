@@ -1,0 +1,78 @@
+\section{Valori dei parametri} \label{sec:param_vals}
+Il valore dei parametri del sistema e del modello di copertura sono stati presi da \cite{valoriForti}, in modo da avere simulazioni il più vicino possibile a uno scenario reale.
+
+\underline{Costanti del sistema}:
+\begin{multicols}{2}
+\begin{itemize}
+
+\item \texttt{NUM\_OF\_SAMPLES =} 250
+
+\item \texttt{NUM\_OF\_ITERATIONS =} 100
+
+\item \texttt{AREA\_WIDTH =} 1000 m
+
+\item \texttt{AREA\_LENGTH =} 1000 m
+
+\item \texttt{MIN\_VERTICAL\_DISTANCE =} 0.15 m
+
+\item \texttt{ALTITUDE =} 50 m, ovvero la minima altitudine dei droni
+
+\item \texttt{MIN\_VERTICAL\_DISTANCE =} 0.15 m
+
+\item \texttt{N =} 10, \texttt{B =} 4, \texttt{M =} 30
+
+\end{itemize}
+\end{multicols}
+
+\underline{Parametri del modello di copertura}:
+\begin{multicols}{2}
+\begin{itemize}
+
+\item \texttt{PSND =} 7.164$e^{-16}$ mW/Hz, che corrisponde a - 174 dBm/Hz ($\nu$)
+
+\item \texttt{BANDWIDTH =} 2 MHz ($\beta$)
+
+\item \texttt{PATH\_GAIN    =} $\frac{\lambda^2}{(4\pi)^2}$ = 0.0001, dove $\lambda=\frac{c}{f}$ è la lunghezza d'onda del segnale
+
+\item \texttt{TRANSMITTING\_POWER =} 0.2 W ($\psi_i$) uguale per tutti i sensori
+
+\item \texttt{DESIRED\_COVERAGE\_LEVEL =} 0.5 ($\tau$) uguale per tutti gli utenti
+
+\end{itemize}
+\end{multicols}
+
+\underline{Costanti di movimento}:
+\begin{multicols}{2}
+\begin{itemize}
+
+\item \texttt{EPSILON =} 0.1 ($\varepsilon$)
+
+\item \texttt{MAX\_DISPLACEMENT =} 10 m ($\Delta$)
+
+\end{itemize}
+\end{multicols}
+
+\underline{Parametri del modello di esplorazione}:
+\begin{itemize}
+
+\item \texttt{EXPLORATION\_CELL\_WIDTH =} 20 m
+
+\item \texttt{EXPLORATION\_CELL\_HEIGTH =} 20 m
+
+\item \texttt{EXPLORATION\_RADIUS =} 200 m
+
+\item \texttt{EXPLORATION\_WEIGHT =} 0.4 ($\rho$)
+
+\item \texttt{USER\_APPEARANCE\_PROBABILITY =} 0.015 ($\mathbb{P}_N$)
+
+\item \texttt{USER\_DISCONNECTION\_PROBABILITY =} 0.008 ($\mathbb{P}_D$)
+
+\item \texttt{INIT\_PROBABILITY =} 0.5, ovvero la probabilità iniziale di ciascuna cella
+
+\item \texttt{NEIGHBOUR\_SINR\_THRESHOLD =} 0.85, ovvero il valore SINR di soglia oltre al quale considero come coperte anche le celle adiacenti
+
+\item \texttt{DECOUPLING\_HISTORY\_DEPTH =} 5, ovvero il numero di posizioni della traiettoria che considero per la verifica dell'accoppiamento
+
+\item \texttt{COUPLING\_DISTANCE =} 3$\cdot$\texttt{EXPLORATION\_CELL\_WIDTH}, ovvero la distanza minima al di sotto del quale considero due agenti accoppiati in un certo istante
+
+\end{itemize}

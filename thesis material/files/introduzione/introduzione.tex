@@ -1,0 +1,15 @@
+\section*{Introduzione} \label{sec:intro}
+
+Le reti UAV sono dei sistemi che, grazie alla loro scalabilità, flessibilità e adattabilità, hanno trovato un grande impiego in numerosi ambiti, anche molto eterogenei tra loro, come le comunicazioni nelle fasi di soccorso \cite{GuanYue2024CUTD}; il monitoraggio delle coltivazioni \cite{farming}; il monitoraggio ambientale \cite{forest}; la sorveglianza \cite{JainRachna2021TaSS}; l'erogazione di servizi di comunicazione \cite{8675384}; l'esplorazione di pianeti \cite{planetaryExpl}; e molti altri.
+In particolare essi possono formare una rete wireless aerea, con la possibilità di scambiarsi reciprocamente informazioni riguardanti l'ambiente circostante, la presenza di eventuali ostacoli, o la posizione di utenti a cui deve essere garantita la copertura di segnale: perciò, oltre alle comunicazioni UAV-to-UAV generalmente questo tipo di rete ha anche la capacità di comunicare con dispositivi localizzati a terra.
+\newline
+\newline
+Partendo dal modello di copertura esaminato in \cite{tesiInnocenti}, e supponendo che il numero di utenti totali non sia noto, e che anzi potrebbe variare nel tempo, questa tesi si pone l'obiettivo di sviluppare un algoritmo di esplorazione collaborativo per reti UAV avente il compito di guidare i droni nell'esplorazione dell'area alla ricerca di nuovi utenti, e che al contempo riesca a garantire la copertura di segnale di quelli già connessi alla rete.
+
+In letteratura esistono varie metriche su cui basarsi per costruire un algoritmo atto all'esplorazione di una regione.
+Questo comporta che al variare della metrica cambi il comportamento medio che gli agenti esibiscono; per esempio alcuni algoritmi potrebbero avere come obiettivo la massimizzazione dell'estensione geografica coperta nel tempo (Mean Square Distance, MSD), favorendo la decisione da parte degli agenti di spostamenti lunghi, mentre altri algoritmi potrebbero concentrarsi sul disincentivare l'esplorazione ripetuta delle stesse aree (rilascio di feromoni virtuali, \cite{SchroederAdam2017Escb}).
+La diversità di questi approcci comporta una serie di vantaggi e svantaggi nel loro utilizzo, che possono andare dal consumo energetico per gli spostamenti, alla reciproca interferenza tra il segnale degli agenti, alla flessibilità verso variazioni dell'ambiente.
+
+In questo progetto si è deciso di sviluppare un algoritmo di esplorazione basandosi sulla probabilità che, nei punti dell'area di interesse non coperti dal sistema in un certo istante, vi possa essere un utente. Il sistema quindi, equipaggiato con tale algoritmo, si focalizzerà sul cercare di ridurre la probabilità media, sia aumentando la propria estensione totale, riducendo quindi le zone non coperte, sia visitando regioni con associata un'alta probabilità.
+
+

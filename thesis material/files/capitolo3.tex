@@ -1,0 +1,20 @@
+\chapter{Implementazione} \label{ch:implementazione} % 3
+
+In questo capitolo viene discussa l'implementazione dei modelli presentati nel capitolo \ref{ch:modello}, evidenziando le diverse strategie adottate per affrontare alcune problematiche.
+In particolar modo, verrà data rilevanza alle tecniche e alle strutture dati impiegate nel calcolo dell'esplorazione, riportando le varianti utilizzate durante il processo di sperimentazione del modello, quali i vari metodi di valutazione del guadagno di esplorazione di un punto campionato da un agente (Sezione \ref{sec:valutazione_esplorazione}).
+
+Il codice del sistema e delle simulazioni, così come la cronologia delle modifiche, è disponibile su GitHub nel seguente repository: 
+
+\href{https://github.com/leonardo-guglielmi/Multiagent-exploration-system.git}{\textsf{https://github.com/leonardo-guglielmi/Multiagent-exploration-system.git}}
+
+Il linguaggio di programmazione utilizzato è 
+%\href{https://www.python.org/about/}{\textbf{Python}}, 
+\textbf{Python}, 
+che grazie alla sua semplicità e alla vasta gamma di librerie disponibili si rende particolarmente adatto alle fasi prototipali di un progetto.
+
+\input{files/ch3/schema_classi} % 3.1
+\input{files/ch3/agenti_concorrenti} % 3.2
+\input{files/ch3/valutazione_esplorazione} % 3.3
+%\input{files/ch3/peso_variabile}
+\pagebreak
+\input{files/ch3/controllo_accoppiamento_agenti} % 3.4

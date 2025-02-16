@@ -1,0 +1,13 @@
+\subsubsection{Funzione per l'esplorazione} \label{subsubsec:expl_funct}
+Questa funzione (Snippet \ref{snip:expl_funct}), data la matrice di probabilità, va a calcolare il livello globale di esplorazione, andando a fare la media delle probabilità di tutte le celle e trasformando il risultato in modo che, ad una probabilità complessiva minore, venga associato un livello di esplorazione maggiore, rendendolo compatibile con un problema di massimizzazione (Formula \ref{eq:global_funct}).
+\lstinputlisting[
+language=Python 
+, label={snip:expl_funct}
+, caption={Funzione per il calcolo dell'esplorazione globale.}
+, float = t
+, frame=tb
+, belowcaptionskip=3mm
+]{code/global_expl_function.py}
+
+Questo metodo può essere usato anche per valutare l'esplorazione in un punto campionato da un agente; tuttavia nella pratica quest'ultimo esplorerà solo quelle celle vicino al \texttt{goal\_point}, rendendo quindi il calcolo globale dell'esplorazione poco conveniente a causa del suo costo computazionale.
+Per tale scopo sono stati quindi creati dei metodi di valutazione dell'esplorazione locale, descritti approfonditamente in \ref{sec:valutazione_esplorazione}.

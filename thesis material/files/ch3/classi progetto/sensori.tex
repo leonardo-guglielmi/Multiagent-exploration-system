@@ -1,0 +1,5 @@
+\subsection{Classi \texttt{Sensor, Agent e Base\_stations}} \label{subsec:sensors}
+La classe \texttt{Sensor} rappresenta un sensore, astraendo le differenze tra agente e BS.
+Contiene le caratteristiche comuni ai due elementi del sistema, ovvero la posizione tridimensionale \texttt{(x,y,z)}; la potenza di trasmissione \texttt{trasmitting\_power}; il raggio di esplorazione \texttt{exploration\_radius}, implementati come attributi della classe.
+La classe \texttt{Agent} estende \texttt{Sensor}, aggiungendovi gli attributi propri degli agenti, ovvero \texttt{trajectory}, una lista cronologica delle posizioni occupate dall'agente, e \texttt{goal\_point}, il punto obiettivo che l'agente vuole raggiungere in un certo istante di tempo.
+La classe \texttt{Base\_station} estende anch'essa \texttt{Sensor}, ed aggiunge semplicemente un attributo booleano \texttt{interference\_by\_bs}: se impostato a \texttt{True}, indica che il segnale di quella BS interferisce con quello degli \texttt{Agent}. Questo flag è stato aggiunto poiché, in molti casi reali, le frequenze sui cui operano i due sensori sono diverse e non interferiscono tra di loro.

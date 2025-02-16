@@ -1,0 +1,50 @@
+\subsection{Valutazione dell'esplorazione tramite frontiera con controllo delle celle adiacenti} \label{subsec:expl_eval_frontier_NCC}
+Il metodo riportato in questa sotto-sezione è quello che verrà usato nelle simulazioni esposte nel Capitolo \ref{ch4:simulazioni}.
+Esso è la combinazione delle varianti \textit{LCIE} e \textit{LSIENCC}, esposte nella sotto-sezione precedente; tale metodo include dunque i vantaggi di avere una regione da valutare il più ridotta possibile, senza però rinunciare alla precisione della stima, e di poter predire il livello di copertura di alcune celle, senza doverne calcolare esplicitamente il valore.
+
+% da ricontrollare
+I passaggi principali in cui l'algoritmo si articola sono i seguenti:
+\begin{enumerate}[wide]
+
+
+\item
+Per prima cosa, il metodo seleziona quelle celle che rientrano nell'area da valutare, inserendo le informazioni rilevanti (posizione del centro e probabilità) in una struttura dati simile ad una matrice, ma con lunghezza delle righe variabile (Snippet \ref{snip:init_expl_eval}).
+Inoltre, identifica gli agenti abbastanza vicini al punto campionato.
+\lstinputlisting[
+language=Python 
+, label={snip:init_expl_eval}
+, caption={Inizializzazione del metodo LCIENCC.}
+, frame=tb
+, float = ht
+, belowcaptionskip=3mm
+]{code/init_expl_eval_method.py}
+
+
+\item
+Successivamente, per ogni cella inclusa, calcola il SINR di ciascun agente precedentemente selezionato.
+Dal calcolo del SINR vengono escluse quelle celle aventi $P_k=0$,  in quanto sono già coperte, e non apporterebbero nessun contributo all'esplorazione (Snippet \ref{snip:core_expl_eval}).
+Se il livello di SINR di una cella supera una certa soglia \texttt{NEIGHBOUR\_SINR\_THRESHOLD}, la cella sovrastante e quella a destra (quella sotto e quella a sinistra sono state già esaminate) vengono inserite in \texttt{already\_checked\_cells}, ossia una lista che permette di escludere tali celle dalla valutazione del livello di SINR.
+Prima di tale inserimento, viene fatta una serie di controlli per escludere quelle celle che eccedono l'aera di valutazione, e per evitare di etichettare come coperta una cella avente probabilità zero. 
+\lstinputlisting[
+language=Python 
+, label={snip:core_expl_eval}
+, caption={Calcolo della copertura nel metodo LCIENCC.}
+, frame=tb
+, float = p
+, belowcaptionskip=3mm
+]{code/core_expl_eval_method.py}
+
+
+\item
+Infine si calcola il livello di esplorazione, basandosi sulla matrice che associa a ciascuna cella il valore di SINR di ogni agente. (Snippet \ref{snip:final_expl_eval}).
+\lstinputlisting[
+language=Python 
+, label={snip:final_expl_eval}
+, caption={Valutazione dell'esplorazione nel metodo LCIENCC.}
+, frame=tb
+, float = h
+, belowcaptionskip=3mm
+]{code/final_expl_eval_method.py}
+
+
+\end{enumerate}

@@ -1,0 +1,31 @@
+\section{Modello di esplorazione} \label{sec:modello_esplorazione}
+% espandi questa sezione
+% MY STUFF --------------------------------------------------------------------------------
+In questa tesi si pone come obiettivo del problema di esplorazione quello di minimizzare la probabilità media che un utente possa trovarsi in una regione non coperta dal segnale di un sensore.
+Per questo motivo, si divide l'area di interesse in $K$ celle uguali, e a ciascuna cella $k$, se non coperta, si associa la probabilità $P_k(t)$ che al suo interno vi sia un utente.
+A tal proposito si definiscono:
+\begin{itemize}
+    \item $\mathbbm{P}_D$ come la probabilità che un utente già connesso alla rete si disconnetta
+
+    \item $\mathbbm{P}_B$ come la probabilità che un nuovo utente voglia connettersi alla rete     
+\end{itemize}
+si definisce quindi la probabilità associata alla cella $k$ nell'istante $t$ come:
+\begin{equation}
+    \label{eq:prob_cella}
+    P_k(t) = \begin{cases}
+        \bar{P_k}(t-1)\ \mathbbm{P}_B + P_k(t-1)\ (1-\mathbbm{P}_D) \text{ se } k \text{ non coperta} \\
+        0 \text{ se } k \text{ coperta}
+    \end{cases}
+\end{equation}
+dove $\bar{P_k}$ è la proprietà complementare di $P_k$, ovvero $\bar{P_k} = 1-P_k$.
+Variando i valori di $\mathbbm{P}_B$, $\mathbbm{P}_D$ è possibile modificare la variabilità dell'ambiente, adattandolo allo scenario reale qualora si abbiano alcune informazioni a priori su di esso.
+Inoltre, al fine di avere un \textit{feedback} sull'effettiva copertura degli utenti nella fase di esplorazione, si va a porre ad 1 la probabilità di una cella qualora essa contenga un utente che, a seguito di una variazione della disposizione degli agenti, passi dallo stato coperto allo stato non coperto.
+
+Come criterio di valutazione della copertura di una cella si è deciso di adottare lo stesso usato nel problema di copertura degli utenti; si va quindi a considerare il \textbf{SINR} calcolato nel \textbf{centro} della cella, riassumendo la probabilità in quella regione con quella del suo centro, e considerandola coperta quando $\gamma_k(t)>\tau'$, dove $\gamma_k(t)=\max\limits_{i=1...N}\{\gamma_{i,k}(t)\}$ e $\tau'$ è la soglia minima richiesta.
+
+Definendo in tal modo la probabilità associata a ciascuna cella, si definisce il \textbf{livello di esplorazione globale} dell'area $A$ come:
+\begin{equation}
+    \label{eq:global_funct}
+    \Pi(t) = 1 - \frac{\sum_k P_k(t)}{K}
+\end{equation}
+in tal modo, minimizzando la probabilità media, si va ad aumentare il livello di esplorazione, trasformando quindi il problema di minimo in un problema di massimo e rendendolo compatibile con il problema di copertura.

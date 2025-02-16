@@ -1,0 +1,14 @@
+\subsubsection{Matrice di distribuzione delle probabilità} \label{subsec:mappa_prob}
+Questa matrice rappresenta l'area di interesse vista dal processo di esplorazione, come riportato in \ref{sec:modello_esplorazione}.
+Essa associa a ciascuna cella, di forma quadrata di lati \texttt{EXPLORATION\_CELL\_WIDTH} e \texttt{EXPLORATION\_CELL\_HEIGTH}, la probabilità che al suo interno vi sia un utente non coperto.
+
+Ad ogni iterazione la matrice di mappatura deve essere aggiornata in modo da riflettere le variazioni dello stato di copertura delle celle; a tale scopo è stata definita una procedura (Snippet \ref{snip:prob_matrix}) che esamina ogni cella, valuta il suo stato di esplorazione con il metodo \texttt{is\_cell\_covered()}, e in caso non sia coperta va ad aggiornarne la probabilità secondo la Formula \ref{eq:prob_cella}.
+Inoltre tale funzione, nel caso in cui al seguito dello spostamento di un sensore un utente che si trova in una cella $k$ passasse dallo stato coperto a quello non coperto, aggiorna la probabilità di quella cella, impostando $P_k=1$; infatti al seguito del cambio di configurazione si ha la certezza che in quella zona vi sia un utente.
+\lstinputlisting[
+language=Python 
+, label={snip:prob_matrix}
+, caption={Metodo di aggiornamento della matrice di probabilità.}
+, float = p
+, frame=tb
+, belowcaptionskip=3mm
+]{code/prob_matrix_snip.py}

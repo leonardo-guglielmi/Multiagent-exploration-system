@@ -1,0 +1,32 @@
+\section{Modello di copertura} \label{sec:modello_copertura}
+
+Nei problemi di copertura ci sono vari requisiti ed indicatori su cui basare la funzione obiettivo; in questa tesi si considera come obiettivo del problema di copertura la massimizzazione del \textbf{Region Coverage Ratio} (RCR), ossia il rapporto tra il numero di utenti coperti $M_C$ e il numero totale di utenti $M_D$ di cui si conosce l'esistenza:
+\begin{equation}
+    RCR = \frac{Mc}{M_D}
+\end{equation}
+
+Per quantificare il livello di copertura di un utente da parte di un sensore si è deciso di usare il \textbf{Signal to Interference plus Noise Ratio}, definito tra un sensore $i$ e un utente $j$ come:
+\begin{equation}
+    \gamma_{i,j}(t)=\frac{\psi_i(t)g_{i,j}(t)}{\mu_{i,j}(t)+\beta\nu_0}
+\end{equation}
+I termini che compaiono nell'equazione sono:
+\begin{itemize}
+    \item
+        $\psi_i(t)$ è la potenza di trasmissione del sensore $i$
+
+    \item
+        $g_{i,j}(t) = \frac{\rho_0}{d_{i,j}(t)}$ rappresenta il guadagno di canale al tempo $t$ tra il sensore $i$ e l'utente $j$, con $\rho_0$ guadagno del collegamento, $d_{i,j}(t)$ la distanza tra i due elementi 
+
+    \item
+        $\mu_{i,j}(t)=\sum_{k\in N\setminus\{i\}} \psi_k(t)g_{k,j}(t)$ è la potenza di interferenza relativa al collegamento $(i, j)$, dovuta alle interferenze tra sensori
+
+    \item
+        $\beta$ è la larghezza di banda del canale, $\nu_0$ è la Power Spectral Density of Noise (PSDN)
+    
+\end{itemize}
+
+Usando questo modello per il SINR, si definisce l'RCR come:
+\begin{equation}
+    C(t) = \frac{\sum_{j=1}^{M_D}c_j(t)}{M_D} = \frac{\sum_{j=1}^{M_D}\mathbbm{1}(\gamma_j(t)-\tau)}{M_D}
+\end{equation}
+con $\tau$ rappresenta il valore di soglia oltre al quale un utente è considerato coperto, $\gamma_j(t)=\max\limits_{i=1...N}\{\gamma_{i,j}(t)\}$ e $\mathbbm{1}(x)$ è la funzione indicatrice.

@@ -1,0 +1,8 @@
+\section{Valutazione dell'esplorazione} \label{sec:valutazione_esplorazione}
+Come accennato in \ref{subsubsec:expl_funct}, andare a valutare per ogni punto campionato l'esplorazione \textbf{globale} risulta estremamente costoso, implicando dei tempi di simulazione estremamente lunghi.
+Inoltre, l'uso di questo approccio è poco utile; infatti dopo il movimento degli agenti nelle zone lontane dal punto campionato in esame avrò verosimilmente uno stato di esplorazione diverso, rendendo la previsione fatta su quelle celle durante la valutazione del punto ottimo poco attendibile.
+A fronte di queste problematiche, durante le fasi sperimentali sono stati progettati e implementati diversi metodi per valutare localmente il livello di esplorazione di un punto, in modo che tale operazione risulti computazionalmente valida.
+
+% metto prima il metodo finale, e poi le caratteristiche di quellli vecchi le ricollego a queste?
+\input{files/ch3/valutazione esplorazione/experimental_expl_eval}
+\input{files/ch3/valutazione esplorazione/expl_eval_frontier_NCC}

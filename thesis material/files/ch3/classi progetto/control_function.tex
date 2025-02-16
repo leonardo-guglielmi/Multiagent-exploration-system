@@ -1,0 +1,76 @@
+\subsection{Classe \texttt{Control\_function}} \label{subsec:control_function}
+Questa classe contiene i metodi utilizzati dalla funzione di controllo.
+Al suo interno sono presenti i riferimenti a tutti gli attori del sistema: troviamo infatti una lista di \texttt{Agent}, una di \texttt{Base\_station} e una di \texttt{User}.
+Inoltre, contiene tutta una serie di attributi usati durante i processi decisionali, come il criterio per la scelta tra i punti campionati, oppure la matrice di probabilità utilizzata per l'esplorazione, descritta meglio in  \ref{subsec:mappa_prob}.
+
+\subsubsection{Metodo  \texttt{move\_agents()}}
+Questa funzione, mostrata nello Snippet \ref{snip:move_agents}, esegue lo spostamento degli agenti come descritto in \ref{sec:algoritmo_controllo}.
+Inoltre, nel caso in cui venga riconosciuta una situazione di accoppiamento tra agenti, viene applicata una deviazione; tale processo è descritto approfonditamente in \ref{sec:controllo_accoppiamento_agenti}.
+
+\lstinputlisting[
+    language=Python 
+    , label= {snip:move_agents}
+    , caption = {Funzione per lo spostamento degli agenti.}
+    , frame=tb
+    , belowcaptionskip=3mm
+    , float = h
+    ]
+{code/move_agent_snip.py}
+
+\subsubsection{Metodo \texttt{get\_points()}}
+Dato un agente, questa funzione campiona un insieme di punti e ne restituisce un sottoinsieme secondo una certa regola.
+Più precisamente, vengono campionati \texttt{NUM\_OF\_SAMPLES} punti secondo una \textbf{distribuzione normale}, centrata nell'attuale posizione dell'agente specificato.
+Le strategie di selezione dei punti adottate sono le seguenti:
+\begin{enumerate}
+
+\item
+Ricerca \textbf{systematic}: vengono considerati tutti i punti campionati. 
+Questa strategia ha il problema che, occasionalmente, restituisce dei punti lontani dall'agente, e se tra questi vi fosse il punto ottimo, porterebbe l'agente a muoversi verso zone che, probabilmente, verrebbero esplorate prima da altri agenti, rendendo lo spostamento vano.
+
+\item
+Ricerca \textbf{local}: tra i punti campionati, vengono selezionati solo quelli che sono più vicini all'agente specificato rispetto ad altri sensori (Snippet \ref{snip:local_search}). Questa strategia predilige quindi un controllo locale dell'area, impedendo che un sensore vada a esplorare una zona che è più facilmente esplorabile da un altro.
+
+\lstinputlisting[
+    language=Python 
+    , label= {snip:local_search}
+    , caption = {Tecnica di selezione \textit{local}.}
+    , frame=tb
+    , belowcaptionskip=3mm
+    , float = t
+    ]
+{code/local_search_snip.py}
+
+\item
+Ricerca \textbf{penalty}: come nella strategia \textit{local}, questa tecnica favorisce quei punti prossimi all'agente. A differenza della precedente non va ad escludere quelli più vicini ad altri, bensì va ad applicare una penalità ai livelli di $C(t)$ e $\Pi(t)$ calcolati in tali punti.
+
+\pagebreak
+\item
+Ricerca \textbf{annealing forward}: riprendendo l'idea dell'algoritmo di ricerca locale \textit{simulated annealing}, si va ad aggiungere alla strategia \textit{local} una probabilità aggiuntiva, decrescente con il tempo, che il punto venga selezionato anche se è più vicino ad altri agenti. %(Snippet \ref{snip:annealing_search}).
+Questa tecnica cerca di evitare lo stallo in punti di massimo locale.
+
+\item
+Ricerca \textbf{annealing reverse}: simile alla ricerca \textit{annealing forward}, in questa tecnica si va ad avere una probabilità crescente nel tempo. %(Snippet \ref{snip:annealing_search}).
+In questo modo, con il passare del tempo, il valore atteso della lunghezza degli spostamenti aumenterà.
+\end{enumerate}
+
+%\lstinputlisting[
+%    language=Python 
+%    , label= {snip:annealing_search}
+%    , caption = {Tecnica di selezione \textit{annealing forward} e \textit{annealing reverse}}
+%    , frame=tb
+%    , belowcaptionskip=3mm
+%    , float = t
+%    ]
+%{code/annealing_search_snip.py}
+
+\subsubsection{\texttt{find\_goal\_point\_for\_agent()}}
+Dato un agente, questo metodo esamina tutti i punti forniti da \texttt{get\_points()}, più la posizione attuale dell'agente, cercando tra di essi l'ottimo.
+Per fare ciò la posizione del sensore viene temporaneamente modificata con quella del punto in esame e viene ricalcolata la funzione obiettivo nella nuova configurazione del sistema; nel caso in cui il valore ottenuto sia il migliore trovato tale punto viene salvato come nuovo $p_i^*$.
+Poiché la funzione obiettivo, come esposto nel capitolo \ref{ch:modello}, si divide in due parti, per valutare $R(t)$ nel nuovo punto dovranno essere calcolati nuovamente l'RCR e il valore di esplorazione.
+
+\subsubsection{\texttt{is\_cell\_covered()}}
+Questo metodo, fornite le coordinate di una cella di esplorazione, ritorna lo stato di copertura di quest'ultima.
+Come indicato in \ref{sec:modello_esplorazione}, per determinare lo stato si prende come punto di riferimento il centro della cella; questo implica un'approssimazione sulla reale probabilità che in quella zona vi sia un utente, approssimazione che cresce all'aumentare della dimensione delle celle.
+
+\input{files/ch3/classi progetto/mappa_probabilità}
+\input{files/ch3/classi progetto/funzione_esplorazione}

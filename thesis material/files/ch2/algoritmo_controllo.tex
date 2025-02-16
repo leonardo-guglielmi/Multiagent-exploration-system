@@ -1,0 +1,40 @@
+\section{Algoritmo di controllo} \label{sec:algoritmo_controllo}
+L'algoritmo di controllo ha il compito di indirizzare ciascun agente verso quelle zone che massimizzano la funzione obiettivo $R(t)$, considerando anche le posizioni degli altri agenti.
+In questo progetto la funzione obiettivo si compone di due contributi: l'obiettivo di copertura, che mira a massimizzare l'RCR degli utenti noti, e l'obiettivo di esplorazione, che cerca di massimizzare il livello di esplorazione (o in altri termini, di diminuire la probabilità media).
+Per combinare i due obiettivi, i valori di copertura ed esplorazione vengono sommati, applicando a quest'ultimo un coefficiente $\rho$, il quale indica la rilevanza dell'esplorazione all'interno dell'obiettivo globale:
+\begin{equation}
+    \label{eq:objective_function}
+    R(t) = C(t) + \rho\ \Pi(t)
+\end{equation}
+
+Schematicamente, l'algoritmo di controllo si articola nei seguenti passaggi:
+\begin{enumerate}
+    \item 
+    per ogni agente, campiona \texttt{NUM\_SAMPLES} punti nello spazio, secondo una certa distribuzione di probabilità, successivamente ciascuno di essi viene selezionato o scartato secondo una certa regola.
+    Formalmente, date le posizioni $x_1...x_N\in \mathbbm{R}^3$ degli agenti nel tempo $t$, a ognuno di essi viene associato un insieme di punti $S_i\subset A$.
+
+    \item
+    per ogni agente $i$, si individua tra i punti $p_i\in S_i$ quello che, se assunto come nuova posizione dell'agente, massimizzerebbe $R(t)$, ovvero $p^*_i=\argmax\limits_{p_i\in S_i} R(t)$, valutando quindi per ogni punto campionato $C(t)$ e $\Pi(t)$.
+
+    \item
+    All'istante successivo $t+1$ si muove l'agente $i$ verso il suo punto obiettivo $p_i^*$, aggiornando la sua posizione secondo la formula:
+    \begin{equation}
+        x_i(t+1) = \begin{cases}
+            x_i(t)+\varepsilon\delta_i\ \ \ \ \text{ se } \varepsilon||\delta_i||<\Delta \\
+            x_i(t)+\Delta \cfrac{\delta_i}{||\delta_i||}\ \ \ \ \text{ altrimenti}
+        \end{cases}
+    \end{equation}
+    dove $\delta_i=p_i^*-x_i$ è la distanza tra il punto obiettivo e la posizione attuale dell'agente; $\varepsilon\in(0,1)$ è la percentuale di spostamento che l'agente compie verso l'obiettivo; $\Delta\in 
+    % qui milgiora
+    \mathbbm{R}$ è la massima distanza che un agente può percorrere ad ogni iterazione. Limitando la massima distanza di spostamento si evita di perturbare eccessivamente la configurazione, favorendo la coordinazione del sistema \cite{PangBao2021Eorw}. 
+
+    \item 
+    l'algoritmo ripete i punti precedenti per \texttt{NUM\_OF\_ITERATIONS} iterazioni.
+\end{enumerate}
+
+La natura iterativa di questo algoritmo permette agli agenti di coordinarsi tra di loro: in ciascuna iterazione ogni agente rivaluta la propria direzione al seguito dello spostamento degli altri agenti, evitando di esplorare zone più facilmente raggiungibili da altri e migliorando la resa del sistema in termini di esplorazione e copertura utente.
+Affinché l'algoritmo possa funzionare correttamente si rende necessario l'utilizzo di alcune strutture dati, che verranno aggiornate a ciascuna iterazione: più precisamente, è necessaria una lista contenente gli utenti noti al tempo $t$, e una matrice che divida l'area in celle e associ a ciascuna di queste la relativa probabilità.
+
+Osservando il bilanciamento dei due obiettivi all'interno di $R(t)$ durante la fase di valutazione di $p_i^*$ per ciascun agente si nota come il livello di copertura non possa mai essere maggiore di 1, ed è minore solo nei casi in cui un agente, spostandosi, non riesca più a coprire uno o più utenti.
+Applicando il coefficiente $\rho$ al valore di esplorazione si riducono le possibilità che ciò accada, evitando che si perdano completamente informazioni su alcuni utenti e favorendo quindi la copertura di quelli noti.
+Tuttavia, tale perdita è concessa nel caso in cui il guadagno in termini di esplorazione sia molto alto.

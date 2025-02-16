@@ -1,0 +1,17 @@
+\section{Esecuzione concorrente} \label{subsec:concur_agents}
+
+In un contesto reale, ciascun agente eseguirebbe la funzione obiettivo sul proprio sistema di calcolo in modo indipendente dagli altri.
+Si è dunque ritenuto opportuno implementare un meccanismo di parallelizzazione per il calcolo del \texttt{goal\_point} di ciascun agente, riducendo sensibilmente i tempi di esecuzione delle simulazioni.
+Data la presenza nell'interprete Python del \textit{Global Interpreter Lock}, la scelta del modulo da impiegare è ricaduta su \texttt{multiprocessing}, un package Python che espone delle API per la creazione e gestione di processi paralleli.
+
+ Per parallelizzare la simulazione, si crea un processo distinto per ciascun agente, il quale eseguirà il metodo \texttt{goal\_point\_agent()}.
+ Una volta calcolato il punto ottimo, il processo lo inserisce in un dizionario condiviso, associandogli come chiave l'id del proprio agente.
+Una volta terminati tutti i processi agente, nel processo principale viene estratto dal dizionario ciascun \texttt{goal\_point} e associato al relativo agente (Snippet \ref{snip:concurrent_simu}).
+\lstinputlisting[
+language=Python 
+, label = {snip:concurrent_simu}
+, caption = {Esecuzione parallela della ricerca del \texttt{goal\_point}.}
+, float = t
+, frame = tb
+, belowcaptionskip = 3mm
+]{code/concurrent_simu.py}

@@ -1,0 +1,172 @@
+\documentclass[a4paper,oneside]{Tptesi2}
+
+\usepackage[italian]{babel}
+\usepackage{listings}
+\usepackage{amsmath,amssymb}
+\usepackage{verbatim}
+\usepackage{indentfirst}
+\usepackage[utf8]{inputenc}
+\usepackage{subfigure}
+\usepackage{algorithmic}
+\usepackage{framed}
+\usepackage{rotating}
+% ---------------- included packages by me
+\usepackage{import}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage[rightcaption]{sidecap}
+\usepackage{multicol}
+\usepackage[sorting=none]{biblatex}
+\addbibresource{biblio.bib}
+\usepackage{csquotes}
+
+
+\newcommand{\mr}{\emph{motore di ricerca}}
+\newcommand{\Mr}{\emph{Motore di ricerca}}
+\newcommand{\ws}{Web~service }
+
+
+% Use a small font for the verbatim environment
+\makeatletter  % makes '@' an ordinary character
+\renewcommand{\verbatim@font}{%
+  \ttfamily\footnotesize\catcode`\<=\active\catcode`\>=\active%
+}
+\makeatother   % makes '@' a special symbol again
+%
+% Simboli Matematici -------------------------------------------------------------
+%\newcommand{\h}{\mathcal{H}_\infty} % scorciatoia per sequenza usata spesso
+% Definizioni & Teoremi ----------------------------------------------------------
+\newtheorem{teorema}{Teorema}[chapter]
+\newtheorem{corollario}[teorema]{Corollario}
+\newtheorem{lemma}[teorema]{Lemma}
+%\theoremstyle{definition}
+\newtheorem{definizione}{Definizione}[chapter]
+\newtheorem{proposizione}[definizione]{Proposizione}
+% Formattazione Figure -----------------------------------------------------------
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{3}
+\def\topfraction{1}
+\def\textfraction{0}
+% Fuzz ---------------------------------------------------------------------------
+%\hfuzz10cm %Non scassare linee che escono dal bordo
+
+% ------------------------ listing package configuration
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.3,0.3,0.3}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+% colors defined by me
+\definecolor{code_blue}{rgb}{0.0, 0.4, 1}
+\definecolor{code_green}{rgb}{0, 0.6, 0}
+\definecolor{light_orange}{rgb}{1, 0.46, 0.1}
+\definecolor{dark_orange}{rgb}{1, 0.20, 0.0}
+
+\lstdefinestyle{pyStyle} {
+  backgroundcolor=\color{backcolour},   
+  commentstyle=\color{code_green},
+  keywordstyle=\color{code_blue},
+  numberstyle=\sffamily\tiny\color{codegray},
+  stringstyle=\color{light_orange},
+  basicstyle=\ttfamily\scriptsize,
+  breakatwhitespace=false,   
+  breaklines=true,                 
+  captionpos=b
+  keepspaces=true,                 
+  numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=1
+}
+\lstset{style=pyStyle}
+
+% --------------------------------------- MATH OPERATOR CREATED BY MYSSELF
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+% ===========================================================================================
+% Frontespizio -------------------------------------------------------------------
+       \title{Metodi di esplorazione finalizzati alla copertura di utenti mediante agenti autonomi}
+       \author{Leonardo Guglielmi}
+       \titolocorso{Ingegneria Informatica}
+       \chair{Prof. Giorgio Battistelli}
+       \numberofmembers{1} %numero dei relatori
+       \degreeyear{2024/25}
+       \numerocorrelatori{1} %numero dei correlatori
+       \correlatori{Nicola Forti} % i correlatori separati da \\
+
+%
+% ---- Inclusioni (vedi piu` sotto per il comando "include" --------------
+%\includeonly {introduzione,chapter1, chapter2}
+%\includeonly {chapter1, chapter2, chapter3, chapter4, chapter5, chapter6}
+%\includeonly{chapter6}
+%
+\hypersetup{%
+%  pdfpagemode=FullScreen,%
+  plainpages=false,%
+  breaklinks,%
+  pdftitle={},%
+  pdfauthor={Leonardo Guglielmi},%
+  pdfsubject={},%
+  pdfkeywords={},%
+  colorlinks=true,
+  citecolor={blue},
+  linkcolor={black},
+  urlcolor={cyan}
+}
+
+\begin{document}
+
+\frontmatter
+
+%\hyphenation{}
+
+\pagestyle{headings} % rende attive le impostazioni sulla testata!
+
+\maketitle % crea il frontespizio (ricordati di copiare "stemma.eps" nella tua directory)
+
+
+\pagenumbering{roman}
+\include{files/introduzione/abstract}
+\include{files/introduzione/introduzione}
+\include{files/introduzione/struttura_tesi}
+\tableofcontents % inserisce indice generale
+\cleardoublepage
+
+%\addcontentsline{toc}{chapter}{Elenco delle figure}
+%\addcontentsline{toc}{chapter}{Elenco delle tabelle}
+%\listoftables    % inserisce indice tabelle
+%\addcontentsline{toc}{chapter}{Elenco degli algoritmi}
+%\listofalgorithms
+
+%
+%--------------- Inizio del testo vero e proprio
+%
+
+\pagenumbering{arabic}
+
+\mainmatter
+\include{files/capitolo1}
+\include{files/capitolo2}
+\include{files/capitolo3}
+\include{files/capitolo4}
+\include{files/capitolo5}
+
+\addcontentsline{toc}{chapter}{Bibliografia}
+%\bibliography{biblio}
+\printbibliography
+
+\addcontentsline{toc}{chapter}{Elenco delle figure}
+\listoffigures   % inserisce indice figure
+\addcontentsline{toc}{chapter}{Elenco delle tabelle}
+\listoftables    % inserisce indice tabelle
+\addcontentsline{toc}{chapter}{Elenco degli snippet}
+\lstlistoflistings
+
+\input{files/ringraziamenti}
+
+\end{document}

@@ -1,0 +1,32 @@
+\section{Modello del sistema} \label{sec:modello_sistema}
+Si considerino $M$ \textbf{utenti} a cui deve essere fornita connessione alla rete, distribuiti a terra all'interno di un'area bidimensionale $A$, con posizioni $u_j \in \mathbbm{R}^2 ,\ j \in \{1, ...M \}$.
+Sono presenti $N$ \textbf{agenti} mobili UAV ed eventualmente $B$ \textbf{Base Stations}, aventi l'obiettivo di formare una rete mobile UAV e di fornire segnale agli utenti, mentre esplorano quelle porzioni di area che non sono coperte.
+Si indicano con $x_i \in \mathbbm{R}^3 ,\ i \in \{1, ...N \}$ le posizioni degli agenti mobili, e con $b_k \in \mathbbm{R}^2 ,\ k \in \{1, ...B\}$ le posizioni delle BS.
+Per limitare la problematica della connessione tra agenti, si ipotizza l'impiego di una rete di backhaul che permetta di considerare il grafo di connessione tra agenti sempre connesso.
+D'ora in poi, per semplificare la trattazione, si userà il termine \textit{sensore} per indicare sia gli agenti mobili che le BS, in quanto entrambi hanno la capacità di fornire copertura ed esplorare.
+
+Vengono quindi fatte le seguenti ipotesi sul sistema:
+\begin{enumerate}
+
+\item
+il numero di agenti mobili è strettamente minore del numero di utenti, così come il numero di BS, se presenti, è minore di quello degli agenti: $B<N<M$
+
+% ============================================================================================
+% OLD GRAPH SENSOR NETWORK
+% ============================================================================================
+%\item 
+%ciascun agente ha una capacità di comunicazione limitata, modellata mediante una sfera di raggio $R$ centrata nella posizione dell'agente; si ha che, affinché due sensori $i$ e $j$ possano comunicare direttamente, deve intercorrere una distanza $d(i,j)<R$
+
+%\item
+%la rete che si forma tra i sensori è modellata tramite un grafo indiretto $G=(V,E(t))$, dove $V$ rappresenta l'insieme dei nodi (agenti mobili e BS) mentre $E(t)$ rappresenta i collegamenti indiretti attivi tra i sensori; deriva dunque che, al tempo $t$, $(i,j)\in E(t)\iff d(i,j)<R$.
+
+%\item
+%la rete di sensori comunica mediante una topologia decentralizzata; ciò implica che sia sufficiente che il grafo sia connesso in ciascun istante $t$ 
+
+\item
+al fine di evitare collisioni, gli agenti sono disposti ad altitudini diverse, da cui si ha che, per un sensore $i$ e un utente $j$, $d_{i,j}(t)=\sqrt{||x_i - u_j ||^2 + h_i^2}$
+
+\item
+tra sensori e utenti vengono considerati i collegamenti LoS
+
+\end{enumerate}
